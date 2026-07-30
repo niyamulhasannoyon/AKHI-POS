@@ -6,7 +6,7 @@ import { Customer, Sale, CustomerPayment } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import {
   Users, Plus, DollarSign, Search, Phone, MapPin, Tag,
-  FileText, ArrowLeft, CheckCircle2, History, CreditCard, UserCheck
+  FileText, ArrowLeft, CheckCircle2, History, CreditCard, UserCheck, Edit, Trash2
 } from 'lucide-react';
 
 export default function CustomersPage() {
@@ -20,9 +20,17 @@ export default function CustomersPage() {
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [activeCustomer, setActiveCustomer] = useState<Customer | null>(null);
+
+  // Form State: Edit Customer
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editCategory, setEditCategory] = useState<any>('পাইকারী (Wholesale)');
+  const [editDue, setEditDue] = useState<number | ''>('');
 
   // Form State: Add Customer
   const [custName, setCustName] = useState('');
@@ -82,6 +90,39 @@ export default function CustomersPage() {
     setCustAddress('');
     setCustInitialDue('');
     setShowAddModal(false);
+  };
+
+  const openEditCustomerModal = (c: Customer) => {
+    setActiveCustomer(c);
+    setEditName(c.name);
+    setEditPhone(c.phone);
+    setEditAddress(c.address || '');
+    setEditCategory(c.category || 'পাইকারী (Wholesale)');
+    setEditDue(c.due);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateCustomer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeCustomer) return;
+    if (!editName.trim()) return alert('অনুগ্রহ করে কাস্টমারের নাম দিন');
+
+    farmStore.updateItem('customers', activeCustomer.id, {
+      name: editName.trim(),
+      phone: editPhone.trim() || 'N/A',
+      address: editAddress.trim() || 'N/A',
+      category: editCategory,
+      due: editDue !== '' ? Number(editDue) : activeCustomer.due,
+    });
+
+    setShowEditModal(false);
+    alert('কাস্টমারের তথ্য সফলভাবে আপডেট করা হয়েছে!');
+  };
+
+  const handleDeleteCustomer = (id: string) => {
+    if (confirm('আপনি কি নিশ্চিত যে এই কাস্টমারকে মুছে ফেলতে চান?')) {
+      farmStore.deleteItem('customers', id);
+    }
   };
 
   const handleReceivePayment = (e: React.FormEvent) => {
@@ -252,16 +293,26 @@ export default function CustomersPage() {
                       </span>
                     </td>
                     <td>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => {
                             setActiveCustomer(c);
                             setShowProfileModal(true);
                           }}
-                          className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg text-xs font-semibold flex items-center gap-1 border border-emerald-500/30 transition"
+                          className="px-2.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg text-xs font-semibold flex items-center gap-1 border border-emerald-500/30 transition"
+                          title="প্রোফাইল"
                         >
                           <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>প্রোফাইল দেখুন</span>
+                          <span>প্রোফাইল</span>
+                        </button>
+
+                        <button
+                          onClick={() => openEditCustomerModal(c)}
+                          className="px-2.5 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg text-xs font-semibold flex items-center gap-1 border border-blue-500/30 transition"
+                          title="এডিট"
+                        >
+                          <Edit className="w-3.5 h-3.5 text-blue-400" />
+                          <span>এডিট</span>
                         </button>
 
                         <button
@@ -270,10 +321,19 @@ export default function CustomersPage() {
                             setPayAmount(c.due > 0 ? c.due : '');
                             setShowPaymentModal(true);
                           }}
-                          className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg text-xs font-semibold flex items-center gap-1 border border-amber-500/30 transition"
+                          className="px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg text-xs font-semibold flex items-center gap-1 border border-amber-500/30 transition"
+                          title="বাকি আদায়"
                         >
                           <DollarSign className="w-3.5 h-3.5 text-amber-400" />
-                          <span>বাকি আদায়</span>
+                          <span>আদায়</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDeleteCustomer(c.id)}
+                          className="p-1.5 bg-white/5 hover:bg-rose-500/20 text-rose-400 rounded-lg transition"
+                          title="মুছে ফেলুন"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
@@ -360,6 +420,90 @@ export default function CustomersPage() {
             >
               + গ্রাহক সংরক্ষণ করুন
             </button>
+          </form>
+        </div>
+      )}
+
+      {/* EDIT CUSTOMER MODAL */}
+      {showEditModal && activeCustomer && (
+        <div className="bg-[#121620] border border-blue-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-xl mx-auto">
+          <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+            <h3 className="text-xl font-bold text-blue-400">গ্রাহকের তথ্য এডিট করুন</h3>
+            <button onClick={() => setShowEditModal(false)} className="text-xs text-gray-400 hover:text-white">✕ বন্ধ করুন</button>
+          </div>
+
+          <form onSubmit={handleUpdateCustomer} className="space-y-4">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">গ্রাহকের নাম</label>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">মোবাইল ফোন</label>
+                <input
+                  type="text"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">ক্যাটাগরি</label>
+                <select
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value as any)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-emerald-300 focus:outline-none text-sm"
+                >
+                  <option value="পাইকারী (Wholesale)">পাইকারী (Wholesale)</option>
+                  <option value="খুচরা (Retailer)">খুচরা (Retailer)</option>
+                  <option value="ডিলার (Dealer)">ডিলার (Dealer)</option>
+                  <option value="হোটেল/রেস্টুরেন্ট">হোটেল/রেস্টুরেন্ট</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">ঠিকানা</label>
+              <input
+                type="text"
+                value={editAddress}
+                onChange={(e) => setEditAddress(e.target.value)}
+                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">বর্তমান বকেয়া (৳)</label>
+              <input
+                type="number"
+                value={editDue}
+                onChange={(e) => setEditDue(e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-rose-400 font-bold focus:outline-none focus:border-blue-500 text-sm"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="submit"
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg text-sm"
+              >
+                ✓ আপডেট সংরক্ষণ করুন
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-3 border border-gray-700 hover:bg-gray-800 text-gray-300 rounded-xl text-sm"
+              >
+                বাতিল
+              </button>
+            </div>
           </form>
         </div>
       )}

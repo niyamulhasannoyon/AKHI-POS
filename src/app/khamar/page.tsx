@@ -4,9 +4,21 @@ import { useState, useEffect } from 'react';
 import { farmStore } from '@/lib/store';
 import { Flock, BatchSale, BatchExpense, KhamariLog, KhamarProfile } from '@/lib/types';
 import { formatDate, formatCurrency } from '@/lib/utils';
-import {
-  Plus, Trash2, Bird, ArrowLeft, RefreshCw, Calendar, Clock,
-  ShoppingCart, DollarSign, Activity, FileText, CheckCircle2, TrendingUp, TrendingDown, Egg, Home, Layers
+import { 
+  Bird, 
+  Plus, 
+  ShoppingCart, 
+  DollarSign, 
+  Activity, 
+  Trash2, 
+  Edit,
+  Clock, 
+  Calendar, 
+  RefreshCw, 
+  ArrowLeft,
+  FileText,
+  Egg,
+  Layers
 } from 'lucide-react';
 
 export default function KhamarPage() {
@@ -24,7 +36,7 @@ export default function KhamarPage() {
   // Navigation Tab inside Khamar: 'BATCHES' | 'DAILY_LOGS' | 'FINANCIALS'
   const [mainTab, setMainTab] = useState<'BATCHES' | 'DAILY_LOGS' | 'FINANCIALS'>('BATCHES');
 
-  // Active Modal: null | 'NEW_BATCH' | 'BIRD_SALE' | 'EXPENSE' | 'MORTALITY' | 'DAILY_LOG' | 'REPORT'
+  // Active Modal: null | 'NEW_BATCH' | 'EDIT_BATCH' | 'BIRD_SALE' | 'EXPENSE' | 'MORTALITY' | 'DAILY_LOG' | 'REPORT'
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedFlock, setSelectedFlock] = useState<Flock | null>(null);
 
@@ -36,6 +48,17 @@ export default function KhamarPage() {
   const [pricePerChick, setPricePerChick] = useState<number | ''>('');
   const [batchStartDate, setBatchStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [batchStartTime, setBatchStartTime] = useState(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+
+  // Form State: Edit Batch
+  const [editName, setEditName] = useState('');
+  const [editBreed, setEditBreed] = useState('ব্রয়লার');
+  const [editCompany, setEditCompany] = useState('');
+  const [editInitialQty, setEditInitialQty] = useState<number | ''>('');
+  const [editCurrentQty, setEditCurrentQty] = useState<number | ''>('');
+  const [editUnitPrice, setEditUnitPrice] = useState<number | ''>('');
+  const [editHouseNo, setEditHouseNo] = useState('Shed 1');
+  const [editStatus, setEditStatus] = useState<Flock['status']>('Active');
+  const [editStartDate, setEditStartDate] = useState('');
 
   // Form State 2: Bird Sale (Screenshot 1)
   const [saleDate, setSaleDate] = useState(new Date().toISOString().slice(0, 10));
@@ -147,6 +170,43 @@ export default function KhamarPage() {
     handleResetNewBatch();
     setActiveModal(null);
     alert('নতুন ব্যাচ সফলভাবে যুক্ত করা হয়েছে!');
+  };
+
+  // Handlers for Edit Batch
+  const openEditBatchModal = (flock: Flock) => {
+    setSelectedFlock(flock);
+    setEditName(flock.name);
+    setEditBreed(flock.breed);
+    setEditCompany(flock.companyName || '');
+    setEditInitialQty(flock.initialQty);
+    setEditCurrentQty(flock.currentQty);
+    setEditUnitPrice(flock.unitPrice || '');
+    setEditHouseNo(flock.houseNo);
+    setEditStatus(flock.status);
+    setEditStartDate(flock.startDate);
+    setActiveModal('EDIT_BATCH');
+  };
+
+  const handleUpdateBatch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFlock) return;
+    if (!editName.trim()) return alert('অনুগ্রহ করে ব্যাচের নাম লিখুন');
+
+    const updatedData: Partial<Flock> = {
+      name: editName.trim(),
+      breed: editBreed,
+      companyName: editCompany.trim() || undefined,
+      initialQty: editInitialQty ? Number(editInitialQty) : selectedFlock.initialQty,
+      currentQty: editCurrentQty !== '' ? Number(editCurrentQty) : selectedFlock.currentQty,
+      unitPrice: editUnitPrice !== '' ? Number(editUnitPrice) : undefined,
+      houseNo: editHouseNo || 'Shed 1',
+      status: editStatus,
+      startDate: editStartDate || selectedFlock.startDate,
+    };
+
+    farmStore.updateItem('flocks', selectedFlock.id, updatedData);
+    setActiveModal(null);
+    alert('ব্যাচের তথ্য সফলভাবে পরিবর্তন (Update) করা হয়েছে!');
   };
 
   // Handlers for Bird Sale (Screenshot 1)
@@ -628,6 +688,159 @@ export default function KhamarPage() {
         </div>
       )}
 
+      {/* EDIT BATCH MODAL */}
+      {activeModal === 'EDIT_BATCH' && selectedFlock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#121620] border border-amber-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="p-2 bg-gray-800/80 hover:bg-gray-700 text-gray-300 rounded-xl transition"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h3 className="text-xl font-extrabold text-amber-400">ব্যাচ এডিট / সংশোধন করুন</h3>
+                  <p className="text-xs text-gray-400">ব্যাচের যেকোনো তথ্য পরিবর্তন করুন (ID: {selectedFlock.id})</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateBatch} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-300 mb-1">ব্যাচের নাম</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 text-sm transition"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-amber-400 mb-1.5">বাচ্চার ধরন</label>
+                  <select
+                    value={editBreed}
+                    onChange={(e) => setEditBreed(e.target.value)}
+                    className="w-full bg-[#1a1f2c] border border-amber-500/50 rounded-xl px-4 py-3 text-amber-300 focus:outline-none focus:border-amber-400 text-sm font-medium transition"
+                  >
+                    <option value="ব্রয়লার">ব্রয়লার</option>
+                    <option value="সোনালী">সোনালী</option>
+                    <option value="লেয়ার">লেয়ার</option>
+                    <option value="কক">কক</option>
+                    <option value="দেশী">দেশী</option>
+                    <option value="অন্যান্য">অন্যান্য</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">হ্যাচারি / কোম্পানী</label>
+                  <input
+                    type="text"
+                    value={editCompany}
+                    onChange={(e) => setEditCompany(e.target.value)}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 text-sm transition"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">প্রাথমিক সংখ্যা</label>
+                  <input
+                    type="number"
+                    value={editInitialQty}
+                    onChange={(e) => setEditInitialQty(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">অবশিষ্ট সংখ্যা</label>
+                  <input
+                    type="number"
+                    value={editCurrentQty}
+                    onChange={(e) => setEditCurrentQty(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-emerald-400 font-bold focus:outline-none focus:border-amber-500 text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">প্রতি পিস দাম (৳)</label>
+                  <input
+                    type="number"
+                    value={editUnitPrice}
+                    onChange={(e) => setEditUnitPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">শেড নম্বর</label>
+                  <input
+                    type="text"
+                    value={editHouseNo}
+                    onChange={(e) => setEditHouseNo(e.target.value)}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">স্ট্যাটাস</label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as Flock['status'])}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 text-sm"
+                  >
+                    <option value="Active">Active (সক্রিয়)</option>
+                    <option value="Closed">Closed (বন্ধ / বিক্রি শেষ)</option>
+                    <option value="Quarantine">Quarantine (রোগাক্রান্ত / পৃথক)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-300 mb-1">ব্যাচ শুরুর তারিখ</label>
+                <input
+                  type="date"
+                  value={editStartDate}
+                  onChange={(e) => setEditStartDate(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-amber-400 font-medium focus:outline-none text-sm cursor-pointer"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-3 border-t border-gray-800">
+                <button
+                  type="submit"
+                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3.5 px-5 rounded-full flex items-center justify-center gap-2 shadow-lg text-sm transition"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span>✓ আপডেট নিশ্চিত করুন</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveModal(null)}
+                  className="px-5 py-3.5 border border-gray-700 hover:bg-gray-800 text-gray-300 font-medium rounded-xl text-sm transition"
+                >
+                  বাতিল করুন
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* 2. BIRD SALE MODAL (Matches Screenshot 1) */}
       {activeModal === 'BIRD_SALE' && selectedFlock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
@@ -1059,24 +1272,32 @@ export default function KhamarPage() {
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-1.5">
                       <button
                         onClick={() => {
                           setSelectedFlock(f);
                           setActiveModal('MORTALITY');
                         }}
-                        className="px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                        className="px-2 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition"
                       >
                         <Activity className="w-3.5 h-3.5 text-amber-400" />
                         <span>মরা বাচ্চা</span>
                       </button>
 
                       <button
+                        onClick={() => openEditBatchModal(f)}
+                        className="px-2 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition"
+                      >
+                        <Edit className="w-3.5 h-3.5 text-blue-400" />
+                        <span>এডিট</span>
+                      </button>
+
+                      <button
                         onClick={() => handleDeleteFlock(f.id)}
-                        className="px-3 py-2 bg-white/5 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                        className="px-2 py-2 bg-white/5 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition"
                       >
                         <Trash2 className="w-3.5 h-3.5 text-rose-400" />
-                        <span>মুছে ফেলুন</span>
+                        <span>মুছুন</span>
                       </button>
                     </div>
                   </div>
@@ -1124,13 +1345,22 @@ export default function KhamarPage() {
                           ৳ {metrics.profitOrLoss.toLocaleString()}
                         </td>
                         <td>
-                          <button
-                            onClick={() => handleDeleteFlock(f.id)}
-                            className="p-1.5 bg-white/5 hover:bg-red-500/20 text-red-400 rounded-lg"
-                            title="মুছে ফেলুন"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => openEditBatchModal(f)}
+                              className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition"
+                              title="এডিট করুন"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteFlock(f.id)}
+                              className="p-1.5 bg-white/5 hover:bg-red-500/20 text-red-400 rounded-lg transition"
+                              title="মুছে ফেলুন"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
