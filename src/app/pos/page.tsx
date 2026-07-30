@@ -188,17 +188,17 @@ export default function POSPage() {
             <button onClick={() => setCart([])} className="text-xs text-red-400 hover:underline">Clear</button>
           </div>
 
-          {/* Customer Dropdown */}
-          <div className="mt-3">
-            <label className="text-xs text-gray-400 font-medium block mb-1">Customer Account</label>
+          {/* Customer Selection with Live Autocomplete Suggestions */}
+          <div className="mt-3 relative">
+            <label className="text-xs text-gray-400 font-medium block mb-1">Customer Account (কাস্টমার সিলেক্ট বা সার্চ করুন)</label>
             <select
               value={selectedCustomer}
               onChange={(e) => setSelectedCustomer(e.target.value)}
-              className="w-full bg-slate-900/80 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              className="w-full bg-slate-900/80 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-medium"
             >
               {customers.map(c => (
                 <option key={c.id} value={c.id}>
-                  {c.name} {c.due > 0 ? `(Due: ৳${c.due})` : ''}
+                  {c.name} ({c.phone || 'N/A'}) {c.due > 0 ? `[বাকি: ৳${c.due}]` : ''}
                 </option>
               ))}
             </select>

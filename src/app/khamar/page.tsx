@@ -15,6 +15,11 @@ export default function KhamarPage() {
   const [batchExpenses, setBatchExpenses] = useState<BatchExpense[]>([]);
   const [khamariLogs, setKhamariLogs] = useState<KhamariLog[]>([]);
   const [khamars, setKhamars] = useState<KhamarProfile[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
+
+  // Suggestion visibility toggles
+  const [showBuyerSuggestions, setShowBuyerSuggestions] = useState(false);
+  const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
 
   // Navigation Tab inside Khamar: 'BATCHES' | 'DAILY_LOGS' | 'FINANCIALS'
   const [mainTab, setMainTab] = useState<'BATCHES' | 'DAILY_LOGS' | 'FINANCIALS'>('BATCHES');
@@ -65,6 +70,7 @@ export default function KhamarPage() {
       setBatchExpenses(state.batchExpenses || []);
       setKhamariLogs(state.khamariLogs || []);
       setKhamars(state.khamars || []);
+      setCustomers(state.customers || []);
     };
     update();
     const unsub = farmStore.subscribe(update);
@@ -511,16 +517,43 @@ export default function KhamarPage() {
                 </select>
               </div>
 
-              {/* Field 3: Company Name */}
-              <div>
+              {/* Field 3: Company Name with Autocomplete Suggestions */}
+              <div className="relative">
                 <label className="block text-xs font-medium text-gray-300 mb-1">বাচ্চার কোম্পানীর নাম</label>
                 <input
                   type="text"
                   placeholder="যেমন: কাজী ফার্মস / সিপি হ্যচারি"
                   value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
+                  onFocus={() => setShowCompanySuggestions(true)}
+                  onChange={(e) => {
+                    setCompanyName(e.target.value);
+                    setShowCompanySuggestions(true);
+                  }}
                   className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm transition"
                 />
+
+                {showCompanySuggestions && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#1a1f2c] border border-emerald-500/40 rounded-xl shadow-2xl z-30 max-h-48 overflow-y-auto">
+                    <div className="p-2 text-[10px] uppercase font-bold text-emerald-400 border-b border-gray-800">
+                      জনপ্রিয় হ্যাচারি সমূহের তালিকা (সাজেশন)
+                    </div>
+                    {['কাজী ফার্মস (Kazi Farms)', 'সিপি বাংলাদেশ (CP Hatchery)', 'প্যারাগন হ্যাচারি (Paragon)', 'কোয়ালিটি হ্যাচারি (Quality)', 'নাহার এগ্রো (Nahar Agro)', 'আফতাব বহুমুখী (Aftab)', 'প্রোভাইটা (Provita Chicks)']
+                      .filter(item => item.toLowerCase().includes(companyName.toLowerCase()))
+                      .map((item, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            setCompanyName(item);
+                            setShowCompanySuggestions(false);
+                          }}
+                          className="px-4 py-2 text-xs text-white hover:bg-emerald-500/20 cursor-pointer transition flex items-center justify-between"
+                        >
+                          <span>{item}</span>
+                          <span className="text-[10px] text-emerald-400">বাছাই করুন</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
 
               {/* Field 4 & 5: Side by side Inputs */}
@@ -626,14 +659,48 @@ export default function KhamarPage() {
                 />
               </div>
 
-              <div>
+              <div className="relative">
+                <label className="block text-xs font-medium text-gray-300 mb-1">ক্রেতার নাম</label>
                 <input
                   type="text"
-                  placeholder="ক্রেতার নাম"
+                  placeholder="ক্রেতার নাম লিখুন বা লিস্ট থেকে সিলেক্ট করুন..."
                   value={buyerName}
-                  onChange={(e) => setBuyerName(e.target.value)}
-                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
+                  onFocus={() => setShowBuyerSuggestions(true)}
+                  onChange={(e) => {
+                    setBuyerName(e.target.value);
+                    setShowBuyerSuggestions(true);
+                  }}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-teal-500 text-sm"
                 />
+
+                {showBuyerSuggestions && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#1a1f2c] border border-teal-500/40 rounded-xl shadow-2xl z-30 max-h-48 overflow-y-auto">
+                    <div className="p-2 text-[10px] uppercase font-bold text-teal-400 border-b border-gray-800 flex justify-between items-center">
+                      <span>নথিভুক্ত গ্রাহকদের সাজেশন</span>
+                      <button type="button" onClick={() => setShowBuyerSuggestions(false)} className="text-gray-400 hover:text-white">✕</button>
+                    </div>
+                    {customers
+                      .filter(c => c.name.toLowerCase().includes(buyerName.toLowerCase()) || c.phone.includes(buyerName))
+                      .map((c) => (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            setBuyerName(c.name);
+                            setShowBuyerSuggestions(false);
+                          }}
+                          className="px-4 py-2.5 text-xs hover:bg-teal-500/20 cursor-pointer transition flex items-center justify-between border-b border-gray-800/50"
+                        >
+                          <div>
+                            <div className="font-bold text-white">{c.name}</div>
+                            <div className="text-[10px] text-gray-400">{c.phone} • {c.category || 'কাস্টমার'}</div>
+                          </div>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${c.due > 0 ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                            {c.due > 0 ? `বাকি: ৳${c.due}` : 'বাছাই করুন'}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
