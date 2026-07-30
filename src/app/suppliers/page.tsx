@@ -6,6 +6,10 @@ import { Supplier } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import { Building2, Plus, DollarSign } from 'lucide-react';
 
+function generateId(prefix: string, sliceLength: number): string {
+  return `${prefix}-${Date.now().toString().slice(-sliceLength)}`;
+}
+
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
@@ -23,7 +27,7 @@ export default function SuppliersPage() {
     const address = prompt('Address:', 'Dhaka') || '';
 
     farmStore.addItem('suppliers', {
-      id: `SUP-${Date.now().toString().slice(-4)}`,
+      id: generateId('SUP', 4),
       name,
       phone,
       address,
@@ -41,7 +45,7 @@ export default function SuppliersPage() {
     if (amount > 0) {
       farmStore.updateItem('suppliers', s.id, { balance: Math.max(0, s.balance - amount) });
       farmStore.addItem('accounting', {
-        id: `ACC-${Date.now().toString().slice(-5)}`,
+        id: generateId('ACC', 5),
         date: new Date().toISOString().slice(0, 10),
         type: 'Expense',
         category: 'Supplier Payment',

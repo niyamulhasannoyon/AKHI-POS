@@ -4,7 +4,12 @@ import { useState, useEffect } from 'react';
 import { farmStore } from '@/lib/store';
 import { Product, CartItem, Sale, Customer } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
-import { Search, ShoppingCart, Plus, Minus, Trash2, Printer, Zap } from 'lucide-react';
+import { Search, ShoppingCart, Plus, Minus, Zap } from 'lucide-react';
+
+function generateId(prefix: string, sliceLength: number): string {
+  const timestamp = Date.now().toString();
+  return `${prefix}-${timestamp.slice(-sliceLength)}`;
+}
 
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,44 +26,38 @@ export default function POSPage() {
 
   useEffect(() => {
     const update = () => {
-      const state = farmStore.getState();
-      setProducts(state.products || []);
-      setCustomers(state.customers || []);
+      const st = farmStore.getState();
+      setProducts(st.products || []);
+      setCustomers(st.customers || []);
     };
     update();
-    const unsub = farmStore.subscribe(update);
-    return () => unsub();
+    return farmStore.subscribe(update);
   }, []);
 
-  const filteredProducts = products.filter(p => {
-    const matchesCat = selectedCategory === 'ALL' || p.category === selectedCategory;
-    const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCat && matchesSearch;
-  });
-
   const addToCart = (product: Product) => {
-    setCart(prev => {
-      const idx = prev.findIndex(item => item.id === product.id);
-      if (idx !== -1) {
-        const updated = [...prev];
-        updated[idx].qty += 1;
-        return updated;
-      } else {
-        return [...prev, { id: product.id, name: product.name, price: product.price, unit: product.unit, qty: 1 }];
-      }
-    });
+    const exist = cart.find(c => c.id === product.id);
+    if (exist) {
+      setCart(cart.map(c => c.id === product.id ? { ...c, qty: c.qty + 1 } : c));
+    } else {
+      setCart([...cart, { id: product.id, name: product.name, price: product.price, unit: product.unit, qty: 1 }]);
+    }
   };
 
-  const updateQty = (idx: number, delta: number) => {
-    setCart(prev => {
-      const updated = [...prev];
-      updated[idx].qty += delta;
-      if (updated[idx].qty <= 0) {
-        return updated.filter((_, i) => i !== idx);
+  const updateQty = (id: string, delta: number) => {
+    setCart(cart.map(c => {
+      if (c.id === id) {
+        const nQty = c.qty + delta;
+        return nQty > 0 ? { ...c, qty: nQty } : null;
       }
-      return updated;
-    });
+      return c;
+    }).filter(Boolean) as CartItem[]);
   };
+
+  const filteredProducts = products.filter(p => {
+    const matchCat = selectedCategory === 'ALL' || p.category === selectedCategory;
+    const matchQ = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchQ;
+  });
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const grandTotal = Math.max(0, subtotal - discount);
@@ -73,7 +72,7 @@ export default function POSPage() {
     const customerObj: Customer = customers.find(c => c.id === selectedCustomer) || { id: 'CUST-001', name: 'Walk-in Retail', phone: 'N/A', due: 0, totalPurchases: 0 };
 
     const newSale: Sale = {
-      id: `INV-${Date.now().toString().slice(-6)}`,
+      id: generateId('INV', 6),
       date: new Date().toISOString(),
       customerId: customerObj.id,
       customerName: customerObj.name,
@@ -105,7 +104,7 @@ export default function POSPage() {
 
     // 4. Record Income Entry
     farmStore.addItem('accounting', {
-      id: `ACC-${Date.now().toString().slice(-5)}`,
+      id: generateId('ACC', 5),
       date: new Date().toISOString().slice(0, 10),
       type: 'Income',
       category: 'POS Sales',
@@ -210,18 +209,18 @@ export default function POSPage() {
             {cart.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-xs">Cart is empty. Click items on the left.</div>
             ) : (
-              cart.map((item, idx) => (
+              cart.map(item => (
                 <div key={item.id} className="flex items-center justify-between p-2.5 bg-slate-900/60 rounded-xl border border-white/5">
                   <div>
                     <div className="font-bold text-white text-xs">{item.name}</div>
                     <div className="text-[10px] text-gray-400">{formatCurrency(item.price)} / {item.unit}</div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => updateQty(idx, -1)} className="w-6 h-6 rounded-md bg-white/10 text-white hover:bg-emerald-500 flex items-center justify-center font-bold text-xs">
+                    <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 rounded-md bg-white/10 text-white hover:bg-emerald-500 flex items-center justify-center font-bold text-xs">
                       <Minus className="w-3 h-3" />
                     </button>
                     <span className="font-bold text-white text-sm w-4 text-center">{item.qty}</span>
-                    <button onClick={() => updateQty(idx, 1)} className="w-6 h-6 rounded-md bg-white/10 text-white hover:bg-emerald-500 flex items-center justify-center font-bold text-xs">
+                    <button onClick={() => updateQty(item.id, 1)} className="w-6 h-6 rounded-md bg-white/10 text-white hover:bg-emerald-500 flex items-center justify-center font-bold text-xs">
                       <Plus className="w-3 h-3" />
                     </button>
                   </div>

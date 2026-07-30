@@ -6,6 +6,10 @@ import { Employee } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import { UserCheck, Plus, DollarSign } from 'lucide-react';
 
+function generateId(prefix: string, sliceLength: number): string {
+  return `${prefix}-${Date.now().toString().slice(-sliceLength)}`;
+}
+
 export default function HRPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
 
@@ -17,13 +21,13 @@ export default function HRPage() {
   }, []);
 
   const handleAddEmployee = () => {
-    const name = prompt('Employee Full Name:');
+    const name = prompt('Employee Name:');
     if (!name) return;
-    const role = prompt('Role (e.g. Shed Caretaker, Farm Manager):', 'Shed Caretaker') || 'Staff';
-    const salary = Number(prompt('Monthly Salary (৳):', '18000')) || 0;
+    const role = prompt('Role:', 'Shed Caretaker') || 'Staff';
+    const salary = Number(prompt('Monthly Salary (৳):', '15000')) || 0;
 
     farmStore.addItem('employees', {
-      id: `EMP-${Date.now().toString().slice(-4)}`,
+      id: generateId('EMP', 4),
       name,
       role,
       salary,
@@ -37,7 +41,7 @@ export default function HRPage() {
     if (confirm(`Disburse salary for ${emp.name}?\nNet Payable: ${formatCurrency(netSalary)}`)) {
       farmStore.updateItem('employees', emp.id, { advance: 0 });
       farmStore.addItem('accounting', {
-        id: `ACC-${Date.now().toString().slice(-5)}`,
+        id: generateId('ACC', 5),
         date: new Date().toISOString().slice(0, 10),
         type: 'Expense',
         category: 'Employee Salary',

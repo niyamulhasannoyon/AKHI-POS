@@ -12,7 +12,7 @@ export function formatDate(dateString: string): string {
 export function exportToCSV(filename: string, rows: (string | number)[][]) {
   let csvContent = "data:text/csv;charset=utf-8,";
   rows.forEach(rowArray => {
-    let row = rowArray.map(item => `"${(item + '').replace(/"/g, '""')}"`).join(",");
+    const row = rowArray.map(item => `"${(item + '').replace(/"/g, '""')}"`).join(",");
     csvContent += row + "\r\n";
   });
   const encodedUri = encodeURI(csvContent);

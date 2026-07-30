@@ -6,6 +6,10 @@ import { Customer } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import { Users, Plus, DollarSign } from 'lucide-react';
 
+function generateId(prefix: string, sliceLength: number): string {
+  return `${prefix}-${Date.now().toString().slice(-sliceLength)}`;
+}
+
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
 
@@ -23,7 +27,7 @@ export default function CustomersPage() {
     const address = prompt('Address:', 'Gazipur') || '';
 
     farmStore.addItem('customers', {
-      id: `CUST-${Date.now().toString().slice(-4)}`,
+      id: generateId('CUST', 4),
       name,
       phone,
       address,
@@ -42,7 +46,7 @@ export default function CustomersPage() {
     if (amount > 0) {
       farmStore.updateItem('customers', c.id, { due: Math.max(0, c.due - amount) });
       farmStore.addItem('accounting', {
-        id: `ACC-${Date.now().toString().slice(-5)}`,
+        id: generateId('ACC', 5),
         date: new Date().toISOString().slice(0, 10),
         type: 'Income',
         category: 'Customer Due Payment',

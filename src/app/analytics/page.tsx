@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { farmStore } from '@/lib/store';
+import { Sale, AccountingEntry, KhamariLog } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
-import { BarChart3, TrendingUp, DollarSign } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from 'recharts';
 
 export default function AnalyticsPage() {
-  const [sales, setSales] = useState<any[]>([]);
-  const [accounting, setAccounting] = useState<any[]>([]);
-  const [khamariLogs, setKhamariLogs] = useState<any[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [accounting, setAccounting] = useState<AccountingEntry[]>([]);
+  const [khamariLogs, setKhamariLogs] = useState<KhamariLog[]>([]);
 
   useEffect(() => {
     const update = () => {

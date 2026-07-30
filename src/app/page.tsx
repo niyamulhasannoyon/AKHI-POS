@@ -26,7 +26,7 @@ export default function DashboardPage() {
   const netProfit = (totalRevenue + totalIncome) - totalExpense;
 
   const activeBirds = flocks.filter(f => f.status === 'Active').reduce((sum, f) => sum + f.currentQty, 0);
-  const todayEggs = (khamari[0] as any)?.eggGood || 0;
+  const todayEggs = khamari[0]?.eggGood || 0;
 
   return (
     <div className="space-y-6">

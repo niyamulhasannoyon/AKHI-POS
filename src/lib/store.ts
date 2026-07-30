@@ -1,6 +1,6 @@
 'use client';
 
-import { FarmState, Flock, Product, KhamariLog, FeedIngredient, Customer, Supplier, Sale, AccountingEntry, Loan, Installment, Employee } from './types';
+import { FarmState } from './types';
 
 const STORAGE_KEY = 'AKHI_POULTRY_NEXTJS_DATA_V4';
 
@@ -138,24 +138,38 @@ class FarmStore {
   }
 
   // Mutations
-  public addItem<K extends keyof FarmState>(key: K, item: any) {
-    (this.state[key] as any[]).unshift(item);
-    this.saveState();
-  }
-
-  public updateItem<K extends keyof FarmState>(key: K, id: string, updatedFields: Partial<any>) {
-    const list = this.state[key] as any[];
-    const idx = list.findIndex(x => x.id === id);
-    if (idx !== -1) {
-      list[idx] = { ...list[idx], ...updatedFields };
+  public addItem<K extends keyof FarmState>(key: K, item: FarmState[K] extends (infer T)[] ? T : FarmState[K]) {
+    const list = this.state[key];
+    if (Array.isArray(list)) {
+      (list as unknown as unknown[]).unshift(item);
       this.saveState();
     }
   }
 
+  public updateItem<K extends keyof FarmState>(
+    key: K,
+    id: string,
+    updatedFields: Partial<FarmState[K] extends (infer T)[] ? T : Record<string, unknown>>
+  ) {
+    const list = this.state[key];
+    if (Array.isArray(list)) {
+      const idx = (list as unknown as { id: string }[]).findIndex(x => x.id === id);
+      if (idx !== -1) {
+        (list as unknown as Record<string, unknown>[])[idx] = {
+          ...(list as unknown as Record<string, unknown>[])[idx],
+          ...updatedFields
+        };
+        this.saveState();
+      }
+    }
+  }
+
   public deleteItem<K extends keyof FarmState>(key: K, id: string) {
-    const list = this.state[key] as any[];
-    this.state[key] = list.filter(x => x.id !== id) as any;
-    this.saveState();
+    const list = this.state[key];
+    if (Array.isArray(list)) {
+      this.state[key] = (list as unknown as { id: string }[]).filter(x => x.id !== id) as unknown as FarmState[K];
+      this.saveState();
+    }
   }
 
   public exportBackupJSON(): string {

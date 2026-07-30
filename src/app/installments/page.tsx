@@ -6,6 +6,10 @@ import { Installment } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Clock, DollarSign } from 'lucide-react';
 
+function generateId(prefix: string, sliceLength: number): string {
+  return `${prefix}-${Date.now().toString().slice(-sliceLength)}`;
+}
+
 export default function InstallmentsPage() {
   const [installments, setInstallments] = useState<Installment[]>([]);
 
@@ -23,7 +27,7 @@ export default function InstallmentsPage() {
       const newRemaining = Math.max(0, ins.totalAmount - newPaid);
       farmStore.updateItem('installments', ins.id, { paidAmount: newPaid, remaining: newRemaining });
       farmStore.addItem('accounting', {
-        id: `ACC-${Date.now().toString().slice(-5)}`,
+        id: generateId('ACC', 5),
         date: new Date().toISOString().slice(0, 10),
         type: 'Income',
         category: 'Installment Payment',

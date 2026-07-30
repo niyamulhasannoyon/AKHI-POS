@@ -6,6 +6,10 @@ import { Loan } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Landmark, Plus, DollarSign } from 'lucide-react';
 
+function generateId(prefix: string, sliceLength: number): string {
+  return `${prefix}-${Date.now().toString().slice(-sliceLength)}`;
+}
+
 export default function LoansPage() {
   const [loans, setLoans] = useState<Loan[]>([]);
 
@@ -23,14 +27,17 @@ export default function LoansPage() {
     const interestRate = Number(prompt('Interest Rate (%):', '8')) || 0;
     const emi = Number(prompt('Monthly EMI (৳):', '22500')) || 0;
 
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + 30);
+
     farmStore.addItem('loans', {
-      id: `LN-${Date.now().toString().slice(-4)}`,
+      id: generateId('LN', 4),
       lender,
       amount,
       interestRate,
       emi,
       remaining: amount,
-      nextDueDate: new Date(Date.now() + 30*24*60*60*1000).toISOString().slice(0,10)
+      nextDueDate: nextDate.toISOString().slice(0, 10)
     });
   };
 
@@ -39,7 +46,7 @@ export default function LoansPage() {
     if (pay > 0) {
       farmStore.updateItem('loans', loan.id, { remaining: Math.max(0, loan.remaining - pay) });
       farmStore.addItem('accounting', {
-        id: `ACC-${Date.now().toString().slice(-5)}`,
+        id: generateId('ACC', 5),
         date: new Date().toISOString().slice(0, 10),
         type: 'Expense',
         category: 'Loan EMI Payment',
