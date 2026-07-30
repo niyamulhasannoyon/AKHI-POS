@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { farmStore } from '@/lib/store';
-import { Download, Upload, Clock as ClockIcon } from 'lucide-react';
+import { Download, Upload, Clock as ClockIcon, RotateCcw } from 'lucide-react';
 
 export default function Header() {
   const [timeStr, setTimeStr] = useState<string>('');
@@ -65,6 +65,14 @@ export default function Header() {
     input.click();
   };
 
+  const handleResetAllData = () => {
+    if (confirm('আপনি কি নিশ্চিত যে সমস্ত ডেমো ডেটা মুছে ফেলে রিয়েল কাজের জন্য সিস্টেম রিসেট করতে চান? (এই অ্যাকশনটি ব্যাকআপ না নিয়ে ফিরিয়ে আনা যাবে না)')) {
+      farmStore.clearAllData();
+      alert('সফলভাবে সমস্ত ডেমো ডেটা রিসেট করা হয়েছে! আপনি এখন আসল ডেটা নিয়ে কাজ করতে পারবেন।');
+      location.reload();
+    }
+  };
+
   return (
     <header className="h-16 bg-[#090d16]/80 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between sticky top-0 z-30 ml-64">
       <div className="flex items-center gap-3">
@@ -100,6 +108,15 @@ export default function Header() {
         >
           <Upload className="w-3.5 h-3.5" />
           <span>Import</span>
+        </button>
+
+        <button 
+          onClick={handleResetAllData} 
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 rounded-lg font-bold transition"
+          title="সমস্ত ডেমো ডেটা মুছে ফেলে রিয়েল কাজের জন্য সিস্টেম পরিষ্কার করুন"
+        >
+          <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
+          <span>রিসেট ডেটা</span>
         </button>
       </div>
     </header>

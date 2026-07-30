@@ -4,6 +4,33 @@ import { FarmState } from './types';
 
 const STORAGE_KEY = 'AKHI_POULTRY_NEXTJS_DATA_V4';
 
+export const EMPTY_STATE: FarmState = {
+  settings: {
+    farmName: 'Akhi Poultry Farm & Feed Mills',
+    phone: '+880 1700-000000',
+    address: 'Khamar Road, Gazipur, Bangladesh',
+    currency: '৳',
+    taxRate: 0,
+    printerWidth: '80mm',
+    theme: 'dark'
+  },
+  flocks: [],
+  products: [],
+  khamariLogs: [],
+  feedIngredients: [],
+  customers: [],
+  suppliers: [],
+  sales: [],
+  accounting: [],
+  loans: [],
+  installments: [],
+  employees: [],
+  batchSales: [],
+  batchExpenses: [],
+  khamars: [],
+  customerPayments: []
+};
+
 export const DEFAULT_SEED: FarmState = {
   settings: {
     farmName: 'Akhi Poultry Farm & Feed Mills',
@@ -41,9 +68,9 @@ export const DEFAULT_SEED: FarmState = {
     { id: 'ING-05', name: 'Premix & Enzymes', stockKg: 350, costPerKg: 180 }
   ],
   customers: [
-    { id: 'CUST-001', name: 'Walk-in Retail Customer', phone: 'N/A', due: 0, totalPurchases: 15400, address: 'Counter Sale' },
-    { id: 'CUST-002', name: 'Rahim Wholesale Egg Trader', phone: '01819-112233', due: 4200, totalPurchases: 128000, address: 'Gazipur Sadar Market' },
-    { id: 'CUST-003', name: 'Alam Broiler House', phone: '01712-445566', due: 15000, totalPurchases: 245000, address: 'Tongi Bazar' }
+    { id: 'CUST-001', name: 'Walk-in Retail Customer', phone: 'N/A', due: 0, totalPurchases: 15400, address: 'Counter Sale', category: 'খুচরা (Retailer)' },
+    { id: 'CUST-002', name: 'Rahim Wholesale Egg Trader', phone: '01819-112233', due: 4200, totalPurchases: 128000, address: 'Gazipur Sadar Market', category: 'পাইকারী (Wholesale)' },
+    { id: 'CUST-003', name: 'Alam Broiler House', phone: '01712-445566', due: 15000, totalPurchases: 245000, address: 'Tongi Bazar', category: 'ডিলার (Dealer)' }
   ],
   suppliers: [
     { id: 'SUP-001', name: 'Quality Feed Mills Ltd', phone: '01911-998877', balance: 35000, address: 'Dhaka Division' },
@@ -184,6 +211,23 @@ class FarmStore {
       this.state[key] = (list as unknown as { id: string }[]).filter(x => x.id !== id) as unknown as FarmState[K];
       this.saveState();
     }
+  }
+
+  public clearAllData() {
+    this.state = { ...EMPTY_STATE };
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(EMPTY_STATE));
+        this.notify();
+      } catch (e) {
+        console.error('Error clearing data:', e);
+      }
+    }
+  }
+
+  public resetToDemoSeed() {
+    this.state = { ...DEFAULT_SEED };
+    this.saveState();
   }
 
   public exportBackupJSON(): string {
