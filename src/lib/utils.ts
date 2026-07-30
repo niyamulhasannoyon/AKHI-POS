@@ -23,3 +23,14 @@ export function exportToCSV(filename: string, rows: (string | number)[][]) {
   link.click();
   link.remove();
 }
+
+export function calculateFlockAgeDays(startDate: string): number {
+  if (!startDate) return 1;
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const diffTime = now.getTime() - start.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(1, diffDays + 1);
+}

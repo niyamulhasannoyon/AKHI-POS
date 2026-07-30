@@ -172,6 +172,15 @@ export interface BatchExpense {
   note?: string;
 }
 
+export interface PosAuthorizedEmail {
+  id: string;
+  email: string;
+  name: string;
+  role: 'Admin' | 'Manager' | 'Cashier' | 'Sales Operator';
+  status: 'Active' | 'Inactive';
+  addedDate: string;
+}
+
 export interface FarmState {
   settings: Setting;
   flocks: Flock[];
@@ -189,4 +198,5 @@ export interface FarmState {
   batchExpenses: BatchExpense[];
   khamars: KhamarProfile[];
   customerPayments: CustomerPayment[];
+  posAuthorizedEmails: PosAuthorizedEmail[];
 }

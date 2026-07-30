@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { farmStore } from '@/lib/store';
 import { Flock, BatchSale, BatchExpense, KhamariLog, KhamarProfile } from '@/lib/types';
-import { formatDate, formatCurrency } from '@/lib/utils';
+import { formatDate, formatCurrency, calculateFlockAgeDays } from '@/lib/utils';
 import { 
   Bird, 
   Plus, 
@@ -1215,7 +1215,7 @@ export default function KhamarPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-2xl font-extrabold text-amber-400">{f.ageDays}</span>
+                        <span className="text-2xl font-extrabold text-amber-400">{calculateFlockAgeDays(f.startDate)}</span>
                         <div className="text-[10px] text-gray-400 uppercase">দিন বয়স</div>
                       </div>
                     </div>
@@ -1335,7 +1335,7 @@ export default function KhamarPage() {
                         <td className="font-bold text-emerald-400">{f.id}</td>
                         <td><b>{f.name}</b><br/><small className="text-gray-400">{f.breed} ({f.companyName || 'N/A'})</small></td>
                         <td>{formatDate(f.startDate)}</td>
-                        <td><b>{f.ageDays} দিন</b></td>
+                        <td><b>{calculateFlockAgeDays(f.startDate)} দিন</b></td>
                         <td>{f.initialQty} টি</td>
                         <td className="font-bold text-emerald-400">{f.currentQty} টি</td>
                         <td className="text-red-400 font-semibold">{dead} টি</td>

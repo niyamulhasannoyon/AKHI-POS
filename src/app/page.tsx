@@ -3,12 +3,34 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { farmStore } from '@/lib/store';
-import { FarmState } from '@/lib/types';
-import { formatCurrency } from '@/lib/utils';
-import { DollarSign, TrendingUp, Bird, Egg, ShoppingBag, PlusCircle, ArrowRight } from 'lucide-react';
+import { FarmState, PosAuthorizedEmail } from '@/lib/types';
+import { formatCurrency, calculateFlockAgeDays } from '@/lib/utils';
+import { 
+  DollarSign, 
+  TrendingUp, 
+  Bird, 
+  Egg, 
+  ShoppingBag, 
+  PlusCircle, 
+  ArrowRight,
+  ShieldCheck,
+  UserPlus,
+  Mail,
+  Lock,
+  CheckCircle,
+  XCircle,
+  Trash2,
+  Key
+} from 'lucide-react';
 
 export default function DashboardPage() {
   const [state, setState] = useState<FarmState>(farmStore.getState());
+
+  // POS Access Control Form State
+  const [newEmail, setNewEmail] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newRole, setNewRole] = useState<'Admin' | 'Manager' | 'Cashier' | 'Sales Operator'>('Cashier');
+  const [showAddEmailModal, setShowAddEmailModal] = useState(false);
 
   useEffect(() => {
     const unsub = farmStore.subscribe((s) => setState({ ...s }));
@@ -19,6 +41,7 @@ export default function DashboardPage() {
   const acc = state.accounting || [];
   const flocks = state.flocks || [];
   const khamari = state.khamariLogs || [];
+  const posEmails: PosAuthorizedEmail[] = state.posAuthorizedEmails || [];
 
   const totalRevenue = sales.reduce((sum, s) => sum + (s.grandTotal || 0), 0);
   const totalIncome = acc.filter(a => a.type === 'Income').reduce((sum, a) => sum + a.amount, 0);
@@ -27,6 +50,39 @@ export default function DashboardPage() {
 
   const activeBirds = flocks.filter(f => f.status === 'Active').reduce((sum, f) => sum + f.currentQty, 0);
   const todayEggs = khamari[0]?.eggGood || 0;
+
+  const handleAddPosEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmail.trim() || !newEmail.includes('@')) {
+      return alert('অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা প্রদান করুন');
+    }
+
+    const newItem: PosAuthorizedEmail = {
+      id: `POS-ACC-${Date.now().toString().slice(-4)}`,
+      email: newEmail.trim().toLowerCase(),
+      name: newName.trim() || 'স্টাফ অপরেটর',
+      role: newRole,
+      status: 'Active',
+      addedDate: new Date().toISOString().slice(0, 10)
+    };
+
+    farmStore.addItem('posAuthorizedEmails', newItem);
+    setNewEmail('');
+    setNewName('');
+    setShowAddEmailModal(false);
+    alert(`ইমেইল ${newItem.email} সফলভাবে অনুমোদিত তালিকায় যুক্ত করা হয়েছে!`);
+  };
+
+  const handleToggleEmailStatus = (id: string, currentStatus: string) => {
+    const nextStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    farmStore.updateItem('posAuthorizedEmails', id, { status: nextStatus });
+  };
+
+  const handleDeleteEmail = (id: string, email: string) => {
+    if (confirm(`আপনি কি নিশ্চিত যে ${email} ইমেইলটির POS অ্যাক্সেস বাতিল করতে চান?`)) {
+      farmStore.deleteItem('posAuthorizedEmails', id);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -85,7 +141,7 @@ export default function DashboardPage() {
             <ShoppingBag className="w-4 h-4" />
             <span>Open POS Register (F2)</span>
           </Link>
-          <Link href="/khamari" className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-amber-950/50 flex items-center gap-2">
+          <Link href="/khamar" className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-amber-950/50 flex items-center gap-2">
             <PlusCircle className="w-4 h-4" />
             <span>Log Daily Khamari Entry</span>
           </Link>
@@ -149,7 +205,7 @@ export default function DashboardPage() {
               <div key={f.id} className="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-white/5">
                 <div>
                   <div className="font-bold text-white text-sm">{f.name}</div>
-                  <div className="text-xs text-gray-400">{f.breed} ({f.houseNo}) • Age {f.ageDays} Days</div>
+                  <div className="text-xs text-gray-400">{f.breed} ({f.houseNo}) • Age {calculateFlockAgeDays(f.startDate)} Days</div>
                 </div>
                 <div className="text-right">
                   <div className="font-extrabold text-emerald-400 text-base">{f.currentQty}</div>
@@ -160,6 +216,172 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* POS ACCESS CONTROL & EMAIL PERMISSIONS MANAGEMENT SECTION */}
+      <div className="glass-card border border-emerald-500/30">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800 pb-4 mb-5">
+          <div>
+            <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+              <span>POS সার্ভিস ও ইউজার এক্সেস পারমিশন কন্ট্রোল (POS Authorized Emails)</span>
+            </h3>
+            <p className="text-xs text-gray-400 mt-1">
+              যেসব ইমেইল অ্যাড্রেস POS রেজিস্টার অ্যাক্সেস করতে পারবে তা সেট করুন।
+            </p>
+          </div>
+
+          <button
+            onClick={() => setShowAddEmailModal(true)}
+            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg flex items-center gap-2 self-start sm:self-auto transition"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>+ নতুন ইমেইল পারমিশন দিন</span>
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="custom-table">
+            <thead>
+              <tr>
+                <th>অপারেটর / নাম</th>
+                <th>অনুমোদিত ইমেইল (Authorized Email)</th>
+                <th>পারমিশন রোল</th>
+                <th>এক্সেস স্ট্যাটাস</th>
+                <th>যুক্ত হওয়ার তারিখ</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody>
+              {posEmails.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-6 text-gray-500">
+                    কোন ইমেইল পারমিশন যুক্ত করা হয়নি।
+                  </td>
+                </tr>
+              ) : (
+                posEmails.map((item) => (
+                  <tr key={item.id}>
+                    <td className="font-bold text-white flex items-center gap-2">
+                      <Key className="w-4 h-4 text-amber-400" />
+                      <span>{item.name}</span>
+                    </td>
+                    <td className="font-mono text-emerald-300 font-semibold">{item.email}</td>
+                    <td>
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                        {item.role}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleToggleEmailStatus(item.id, item.status)}
+                        className={`px-2.5 py-1 rounded-full text-xs font-extrabold flex items-center gap-1.5 transition ${
+                          item.status === 'Active'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                        }`}
+                      >
+                        {item.status === 'Active' ? (
+                          <>
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            <span>Active (অনুমোদিত)</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-3.5 h-3.5" />
+                            <span>Inactive (বন্ধ)</span>
+                          </>
+                        )}
+                      </button>
+                    </td>
+                    <td className="text-xs text-gray-400">{item.addedDate}</td>
+                    <td>
+                      <button
+                        onClick={() => handleDeleteEmail(item.id, item.email)}
+                        className="p-1.5 bg-white/5 hover:bg-rose-500/20 text-rose-400 rounded-lg transition"
+                        title="অ্যাক্সেস বাতিল করুন"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ADD AUTHORIZED EMAIL MODAL */}
+      {showAddEmailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-lg w-full">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+              <h3 className="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                <Lock className="w-5 h-5" />
+                <span>নতুন POS ইমেইল পারমিশন যোগ করুন</span>
+              </h3>
+              <button onClick={() => setShowAddEmailModal(false)} className="text-xs text-gray-400 hover:text-white">✕ বন্ধ করুন</button>
+            </div>
+
+            <form onSubmit={handleAddPosEmail} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">অপারেটর / ক্যাশিয়ারের নাম</label>
+                <input
+                  type="text"
+                  placeholder="যেমন: নিয়ামুল হাসান (ক্যাশ কাউন্টার 1)"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">অনুমোদিত ইমেইল এড্রেস (Authorized Email)</label>
+                <div className="flex items-center gap-2 bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5">
+                  <Mail className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <input
+                    type="email"
+                    placeholder="cashier@akhipos.com"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    className="w-full bg-transparent text-white focus:outline-none text-sm placeholder-gray-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">অ্যাক্সেস রোল (Role)</label>
+                <select
+                  value={newRole}
+                  onChange={(e) => setNewRole(e.target.value as any)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-emerald-300 focus:outline-none text-sm font-medium"
+                >
+                  <option value="Admin">Admin (ফুল পারমিশন)</option>
+                  <option value="Manager">Manager (ম্যানেজার)</option>
+                  <option value="Cashier">Cashier (ক্যাশ কাউন্টার)</option>
+                  <option value="Sales Operator">Sales Operator (বিক্রয় সহকারী)</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="submit"
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg text-sm"
+                >
+                  ✓ ইমেইল অনুমতি সংরক্ষণ করুন
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddEmailModal(false)}
+                  className="px-4 py-3 border border-gray-700 hover:bg-gray-800 text-gray-300 rounded-xl text-sm"
+                >
+                  বাতিল
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

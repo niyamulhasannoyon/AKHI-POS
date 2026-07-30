@@ -14,6 +14,9 @@ function generateId(prefix: string, sliceLength: number): string {
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [posEmails, setPosEmails] = useState<{ email: string; name: string; role: string; status: string }[]>([]);
+  const [operatorEmail, setOperatorEmail] = useState<string>('');
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -29,6 +32,12 @@ export default function POSPage() {
       const st = farmStore.getState();
       setProducts(st.products || []);
       setCustomers(st.customers || []);
+      const emails = st.posAuthorizedEmails || [];
+      setPosEmails(emails);
+      if (emails.length > 0 && !operatorEmail) {
+        const active = emails.find(e => e.status === 'Active');
+        if (active) setOperatorEmail(active.email);
+      }
     };
     update();
     return farmStore.subscribe(update);
@@ -186,6 +195,25 @@ export default function POSPage() {
               <span>Checkout Register</span>
             </h3>
             <button onClick={() => setCart([])} className="text-xs text-red-400 hover:underline">Clear</button>
+          </div>
+
+          {/* POS Authorized Operator Selection Bar */}
+          <div className="mt-2.5 p-2.5 bg-slate-900/90 border border-emerald-500/30 rounded-xl text-xs flex items-center justify-between">
+            <div className="text-gray-300 font-semibold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>অপারেটর ইমেইল:</span>
+            </div>
+            <select
+              value={operatorEmail}
+              onChange={(e) => setOperatorEmail(e.target.value)}
+              className="bg-[#1a1f2c] border border-emerald-500/50 text-emerald-300 font-mono font-bold text-[11px] rounded-lg px-2.5 py-1 focus:outline-none"
+            >
+              {posEmails.map((e) => (
+                <option key={e.email} value={e.email}>
+                  {e.email} ({e.name})
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Customer Selection with Live Autocomplete Suggestions */}

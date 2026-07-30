@@ -28,7 +28,12 @@ export const EMPTY_STATE: FarmState = {
   batchSales: [],
   batchExpenses: [],
   khamars: [],
-  customerPayments: []
+  customerPayments: [],
+  posAuthorizedEmails: [
+    { id: 'POS-ACC-1', email: 'admin@akhipos.com', name: 'অ্যাডমিন অ্যাকাউন্ট', role: 'Admin', status: 'Active', addedDate: '2026-07-01' },
+    { id: 'POS-ACC-2', email: 'noyon@akhipos.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-3', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
+  ]
 };
 
 export const DEFAULT_SEED: FarmState = {
@@ -124,6 +129,11 @@ export const DEFAULT_SEED: FarmState = {
   ],
   customerPayments: [
     { id: 'PAY-01', customerId: 'CUST-002', date: '2026-07-29', amount: 13300, paymentMethod: 'Bkash', note: 'Invoice INV-2026-001 partial payment' }
+  ],
+  posAuthorizedEmails: [
+    { id: 'POS-ACC-1', email: 'admin@akhipos.com', name: 'অ্যাডমিন অ্যাকাউন্ট', role: 'Admin', status: 'Active', addedDate: '2026-07-01' },
+    { id: 'POS-ACC-2', email: 'noyon@akhipos.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-3', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
   ]
 };
 
