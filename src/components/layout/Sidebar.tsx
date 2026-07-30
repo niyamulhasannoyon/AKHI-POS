@@ -6,7 +6,6 @@ import {
   LayoutDashboard, 
   ShoppingCart, 
   Bird, 
-  CalendarCheck, 
   Wheat, 
   Package, 
   Users, 
@@ -21,8 +20,7 @@ import {
 const navItems = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
   { label: 'Point of Sale (F2)', href: '/pos', icon: ShoppingCart, highlight: true },
-  { label: 'Khamar Batches', href: '/khamar', icon: Bird },
-  { label: 'Daily Khamari Entry', href: '/khamari', icon: CalendarCheck, gold: true },
+  { label: 'Khamar Management', href: '/khamar', icon: Bird, highlight: true },
   { label: 'Feed & Gura Engine', href: '/feed-gura', icon: Wheat },
   { label: 'Products & Stock', href: '/inventory', icon: Package },
   { label: 'Customer Ledgers', href: '/customers', icon: Users },
@@ -54,7 +52,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || (item.href === '/khamar' && pathname === '/khamari');
 
           let classNames = "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ";
           
@@ -68,8 +66,8 @@ export default function Sidebar() {
 
           return (
             <Link key={item.href} href={item.href} className={classNames}>
-              <Icon className={`w-5 h-5 ${isActive ? 'text-emerald-400' : item.gold ? 'text-amber-400' : ''}`} />
-              <span className={item.gold && !isActive ? 'text-amber-400 font-semibold' : ''}>
+              <Icon className={`w-5 h-5 ${isActive ? 'text-emerald-400' : ''}`} />
+              <span>
                 {item.label}
               </span>
             </Link>
