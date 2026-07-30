@@ -90,6 +90,13 @@ export const DEFAULT_SEED: FarmState = {
   batchExpenses: [
     { id: 'EXP-01', flockId: 'FL-101', date: '2026-06-01', category: 'বাচ্চা বাবদ খরচ', amount: 52500, note: '1500 chicks @ 35 tk' },
     { id: 'EXP-02', flockId: 'FL-101', date: '2026-06-15', category: 'খাদ্য বাবদ খরচ', amount: 35000, note: 'Starter Feed 14 bags' }
+  ],
+  khamars: [
+    { id: 'KHM-01', name: 'ইব্রাহিম খামার পিটালতলা', ownerName: 'ইব্রাহিম হোসেন', phone: '01711-889900', address: 'পিটালতলা, গাজীপুর', farmType: 'সোনালী', capacity: 3000, notes: 'শেড ১ ও ২ সার্ভিস রানিং' },
+    { id: 'KHM-02', name: 'আখি পোল্ট্রি ফার্ম (প্রধান শাখা)', ownerName: 'নিয়ামুল হাসান', phone: '01700-000000', address: 'খামার রোড, গাজীপুর', farmType: 'ব্রয়লার', capacity: 5000, notes: 'হাই-টেক কন্ট্রোল শেড' }
+  ],
+  customerPayments: [
+    { id: 'PAY-01', customerId: 'CUST-002', date: '2026-07-29', amount: 13300, paymentMethod: 'Bkash', note: 'Invoice INV-2026-001 partial payment' }
   ]
 };
 

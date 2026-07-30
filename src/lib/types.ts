@@ -59,6 +59,8 @@ export interface Customer {
   due: number;
   totalPurchases: number;
   address?: string;
+  category?: 'পাইকারী (Wholesale)' | 'খুচরা (Retailer)' | 'ডিলার (Dealer)' | 'হোটেল/রেস্টুরেন্ট' | string;
+  email?: string;
 }
 
 export interface Supplier {
@@ -130,6 +132,26 @@ export interface Employee {
   status: 'Active' | 'On Leave' | 'Terminated';
 }
 
+export interface KhamarProfile {
+  id: string;
+  name: string;
+  ownerName: string;
+  phone: string;
+  address: string;
+  farmType: 'ব্রয়লার' | 'সোনালী' | 'লেয়ার' | 'মিক্সড';
+  capacity: number;
+  notes?: string;
+}
+
+export interface CustomerPayment {
+  id: string;
+  customerId: string;
+  date: string;
+  amount: number;
+  paymentMethod: string;
+  note?: string;
+}
+
 export interface BatchSale {
   id: string;
   flockId: string;
@@ -165,4 +187,6 @@ export interface FarmState {
   employees: Employee[];
   batchSales: BatchSale[];
   batchExpenses: BatchExpense[];
+  khamars: KhamarProfile[];
+  customerPayments: CustomerPayment[];
 }
