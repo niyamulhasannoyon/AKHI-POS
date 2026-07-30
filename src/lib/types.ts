@@ -12,6 +12,8 @@ export interface Flock {
   id: string;
   name: string;
   breed: string;
+  companyName?: string;
+  unitPrice?: number;
   initialQty: number;
   currentQty: number;
   startDate: string;
@@ -128,6 +130,26 @@ export interface Employee {
   status: 'Active' | 'On Leave' | 'Terminated';
 }
 
+export interface BatchSale {
+  id: string;
+  flockId: string;
+  date: string;
+  buyerName: string;
+  birdQty: number;
+  totalWeight: number;
+  pricePerKg: number;
+  totalAmount: number;
+}
+
+export interface BatchExpense {
+  id: string;
+  flockId: string;
+  date: string;
+  category: string;
+  amount: number;
+  note?: string;
+}
+
 export interface FarmState {
   settings: Setting;
   flocks: Flock[];
@@ -141,4 +163,6 @@ export interface FarmState {
   loans: Loan[];
   installments: Installment[];
   employees: Employee[];
+  batchSales: BatchSale[];
+  batchExpenses: BatchExpense[];
 }

@@ -83,6 +83,13 @@ export const DEFAULT_SEED: FarmState = {
     { id: 'EMP-01', name: 'Malek Hossain', role: 'Farm Manager', salary: 28000, advance: 3000, status: 'Active' },
     { id: 'EMP-02', name: 'Niyamul Hasan', role: 'Chief Feed Operator', salary: 25000, advance: 0, status: 'Active' },
     { id: 'EMP-03', name: 'Sultan Ahmed', role: 'Shed Caretaker', salary: 16000, advance: 1500, status: 'Active' }
+  ],
+  batchSales: [
+    { id: 'BS-01', flockId: 'FL-101', date: '2026-07-25', buyerName: 'Alam Poultry Dealer', birdQty: 200, totalWeight: 440, pricePerKg: 210, totalAmount: 92400 }
+  ],
+  batchExpenses: [
+    { id: 'EXP-01', flockId: 'FL-101', date: '2026-06-01', category: 'বাচ্চা বাবদ খরচ', amount: 52500, note: '1500 chicks @ 35 tk' },
+    { id: 'EXP-02', flockId: 'FL-101', date: '2026-06-15', category: 'খাদ্য বাবদ খরচ', amount: 35000, note: 'Starter Feed 14 bags' }
   ]
 };
 
