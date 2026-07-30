@@ -1,0 +1,144 @@
+export interface Setting {
+  farmName: string;
+  phone: string;
+  address: string;
+  currency: string;
+  taxRate: number;
+  printerWidth: string;
+  theme: string;
+}
+
+export interface Flock {
+  id: string;
+  name: string;
+  breed: string;
+  initialQty: number;
+  currentQty: number;
+  startDate: string;
+  ageDays: number;
+  status: 'Active' | 'Closed' | 'Quarantine';
+  houseNo: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  category: 'Feed & Gura' | 'Eggs' | 'Live Birds' | 'Medicines' | 'Equipment';
+  price: number;
+  cost: number;
+  stock: number;
+  unit: 'Bag' | 'KG' | 'Crate' | 'Pcs' | 'Bottle';
+  minStock: number;
+}
+
+export interface KhamariLog {
+  id: string;
+  flockId: string;
+  date: string;
+  eggGood: number;
+  eggDamaged: number;
+  feedBags: number;
+  mortality: number;
+  temperature: number;
+  notes?: string;
+}
+
+export interface FeedIngredient {
+  id: string;
+  name: string;
+  stockKg: number;
+  costPerKg: number;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  due: number;
+  totalPurchases: number;
+  address?: string;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  phone: string;
+  balance: number;
+  address?: string;
+}
+
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  unit: string;
+  qty: number;
+}
+
+export interface Sale {
+  id: string;
+  date: string;
+  customerId: string;
+  customerName: string;
+  items: CartItem[];
+  subtotal: number;
+  discount: number;
+  grandTotal: number;
+  paidAmount: number;
+  dueAmount: number;
+  paymentMethod: string;
+  status: 'Paid' | 'Due' | 'Partial';
+}
+
+export interface AccountingEntry {
+  id: string;
+  date: string;
+  type: 'Income' | 'Expense';
+  category: string;
+  amount: number;
+  note?: string;
+}
+
+export interface Loan {
+  id: string;
+  lender: string;
+  amount: number;
+  interestRate: number;
+  emi: number;
+  remaining: number;
+  nextDueDate: string;
+}
+
+export interface Installment {
+  id: string;
+  customerName: string;
+  totalAmount: number;
+  paidAmount: number;
+  remaining: number;
+  installmentCount: number;
+  nextDate: string;
+}
+
+export interface Employee {
+  id: string;
+  name: string;
+  role: string;
+  salary: number;
+  advance: number;
+  status: 'Active' | 'On Leave' | 'Terminated';
+}
+
+export interface FarmState {
+  settings: Setting;
+  flocks: Flock[];
+  products: Product[];
+  khamariLogs: KhamariLog[];
+  feedIngredients: FeedIngredient[];
+  customers: Customer[];
+  suppliers: Supplier[];
+  sales: Sale[];
+  accounting: AccountingEntry[];
+  loans: Loan[];
+  installments: Installment[];
+  employees: Employee[];
+}
