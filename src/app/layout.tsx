@@ -7,11 +7,16 @@ export const metadata: Metadata = {
   description: 'Enterprise Poultry Farm Management, Khamar Batch Tracker & Point of Sale (POS) System',
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/logo.png', type: 'image/png' },
+      { url: '/icon.png', type: 'image/png' },
       { url: '/favicon.png', type: 'image/png' },
     ],
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    shortcut: '/favicon.ico',
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/logo.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
   openGraph: {
     title: 'AKHI POS - Smart Poultry Farm & Business Management System Pro',
