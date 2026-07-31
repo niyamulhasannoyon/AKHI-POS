@@ -93,10 +93,16 @@ export default function GoogleAuthModal({ isOpen, onClose }: GoogleAuthModalProp
 
         const role = authMatch ? authMatch.role : 'Admin';
 
+        // Fetch crisp high-resolution Gmail profile picture from Google payload
+        let profilePic = payload.picture ? payload.picture.replace(/=s\d+-c/, '=s256-c') : '';
+        if (!profilePic) {
+          profilePic = `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.name || payload.email)}&background=10b981&color=fff`;
+        }
+
         const user: AuthUser = {
           email: payload.email,
           name: payload.name || payload.email.split('@')[0],
-          picture: payload.picture,
+          picture: profilePic,
           role: role,
           idToken: response.credential,
         };

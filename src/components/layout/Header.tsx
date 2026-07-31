@@ -170,7 +170,15 @@ export default function Header({ onToggleMobileSidebar, onOpenAuthModal }: Heade
           <div className="flex items-center gap-2 pl-2 border-l border-white/10">
             <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
               {currentUser.picture ? (
-                <img src={currentUser.picture} alt={currentUser.name} className="w-5 h-5 rounded-full object-cover border border-emerald-400/50" />
+                <img 
+                  src={currentUser.picture} 
+                  alt={currentUser.name} 
+                  referrerPolicy="no-referrer"
+                  className="w-5 h-5 rounded-full object-cover border border-emerald-400/50" 
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=10b981&color=fff`;
+                  }}
+                />
               ) : (
                 <User className="w-4 h-4 text-emerald-400" />
               )}

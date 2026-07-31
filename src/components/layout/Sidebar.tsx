@@ -43,12 +43,14 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps)
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string>('Admin');
   const [userName, setUserName] = useState<string>('অ্যাডমিন');
+  const [userPicture, setUserPicture] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const update = () => {
       const user = farmStore.getState().currentUser;
       setUserRole(user?.role || 'Admin');
       setUserName(user?.name || 'অ্যাডমিন');
+      setUserPicture(user?.picture);
     };
     update();
     const unsub = farmStore.subscribe(update);
@@ -130,10 +132,22 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps)
 
         {/* User Role Footer Badge */}
         <div className="p-3 border-t border-white/10 bg-slate-900/50 text-xs">
-          <div className="flex items-center gap-2 text-gray-300">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+          <div className="flex items-center gap-2.5 text-gray-300">
+            {userPicture ? (
+              <img 
+                src={userPicture} 
+                alt={userName} 
+                referrerPolicy="no-referrer"
+                className="w-7 h-7 rounded-full object-cover border border-emerald-500/40 flex-shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=10b981&color=fff`;
+                }}
+              />
+            ) : (
+              <ShieldCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            )}
             <div className="truncate">
-              <div className="font-bold text-white truncate">{userName}</div>
+              <div className="font-bold text-white truncate text-xs">{userName}</div>
               <div className="text-[10px] text-emerald-400 font-semibold uppercase">{userRole} এক্সেস মোড</div>
             </div>
           </div>
