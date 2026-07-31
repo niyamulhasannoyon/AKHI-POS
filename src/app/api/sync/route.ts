@@ -302,6 +302,12 @@ export async function POST(request: Request) {
 
     // Sync Flocks
     if (Array.isArray(body.flocks)) {
+      const validFlockIds = body.flocks.map(f => f.id).filter(Boolean);
+      if (validFlockIds.length > 0) {
+        tasks.push(sql`DELETE FROM flocks WHERE NOT (id = ANY(${validFlockIds}))`);
+      } else {
+        tasks.push(sql`DELETE FROM flocks`);
+      }
       body.flocks.forEach(f => {
         tasks.push(sql`
           INSERT INTO flocks (id, name, breed, company_name, unit_price, initial_qty, current_qty, start_date, age_days, status, house_no)
@@ -356,6 +362,27 @@ export async function POST(request: Request) {
             name = EXCLUDED.name,
             role = EXCLUDED.role,
             status = EXCLUDED.status;
+        `);
+      });
+    }
+
+    // Sync Suppliers
+    if (Array.isArray(body.suppliers)) {
+      const validSupIds = body.suppliers.map(s => s.id).filter(Boolean);
+      if (validSupIds.length > 0) {
+        tasks.push(sql`DELETE FROM suppliers WHERE NOT (id = ANY(${validSupIds}))`);
+      } else {
+        tasks.push(sql`DELETE FROM suppliers`);
+      }
+      body.suppliers.forEach(s => {
+        tasks.push(sql`
+          INSERT INTO suppliers (id, name, phone, balance, address)
+          VALUES (${s.id}, ${s.name}, ${s.phone}, ${s.balance}, ${s.address || null})
+          ON CONFLICT (id) DO UPDATE SET
+            name = EXCLUDED.name,
+            phone = EXCLUDED.phone,
+            balance = EXCLUDED.balance,
+            address = EXCLUDED.address;
         `);
       });
     }

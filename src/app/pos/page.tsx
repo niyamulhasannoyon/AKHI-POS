@@ -21,7 +21,7 @@ export default function POSPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const [selectedCustomer, setSelectedCustomer] = useState<string>('CUST-001');
+  const [selectedCustomer, setSelectedCustomer] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const [paidAmount, setPaidAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('Cash');
@@ -78,7 +78,7 @@ export default function POSPage() {
       return;
     }
 
-    const customerObj: Customer = customers.find(c => c.id === selectedCustomer) || { id: 'CUST-001', name: 'Walk-in Retail', phone: 'N/A', due: 0, totalPurchases: 0 };
+    const customerObj: Customer = customers.find(c => c.id === selectedCustomer) || { id: 'walkin', name: 'Walk-in Retail', phone: 'N/A', due: 0, totalPurchases: 0 };
 
     const newSale: Sale = {
       id: generateId('INV', 6),

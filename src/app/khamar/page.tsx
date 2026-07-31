@@ -397,7 +397,7 @@ export default function KhamarPage() {
     }
 
     if (goodEggs > 0) {
-      const eggProduct = farmStore.getState().products.find(p => p.id === 'PRD-003');
+      const eggProduct = farmStore.getState().products.find(p => (p.category || '').toLowerCase().includes('egg') || (p.name || '').toLowerCase().includes('egg'));
       if (eggProduct) {
         const addedCrates = Math.floor(goodEggs / 30);
         if (addedCrates > 0) {

@@ -32,13 +32,15 @@ export const EMPTY_STATE: FarmState = {
   customerPayments: [],
   posAuthorizedEmails: [
     { id: 'POS-ACC-1', email: 'admin@akhipos.com', name: 'অ্যাডমিন অ্যাকাউন্ট', role: 'Admin', status: 'Active', addedDate: '2026-07-01' },
-    { id: 'POS-ACC-2', email: 'noyon@akhipos.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
-    { id: 'POS-ACC-3', email: 'niyamulhasannoyon@gmail.com', name: 'নিয়ামুল হাসান (মালিক জিমেইল)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
-    { id: 'POS-ACC-4', email: 'niyamulhasan@gmail.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
-    { id: 'POS-ACC-5', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
+    { id: 'POS-ACC-2', email: 'noyon@akhipos.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-3', email: 'niyamulhasannoyon@gmail.com', name: 'নিয়ামুল হাসান (মালিক জিমেইল)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-4', email: 'niyamulhasan@gmail.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-5', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
   ]
 };
 
+// DEFAULT_SEED is intentionally empty (no demo/fake data) so a fresh install
+// starts clean. Real data is added by the farm owner through the app UI.
 export const DEFAULT_SEED: FarmState = {
   settings: {
     farmName: 'Akhi Poultry Farm & Feed Mills',
@@ -49,98 +51,66 @@ export const DEFAULT_SEED: FarmState = {
     printerWidth: '80mm',
     theme: 'dark'
   },
-  flocks: [
-    { id: 'FL-101', name: 'Batch 101 - Sonali Breeder', breed: 'Sonali Classic', initialQty: 1500, currentQty: 1465, startDate: '2026-06-01', ageDays: 60, status: 'Active', houseNo: 'Shed 1' },
-    { id: 'FL-102', name: 'Batch 102 - Broiler Cobb500', breed: 'Cobb 500', initialQty: 3000, currentQty: 2940, startDate: '2026-07-10', ageDays: 21, status: 'Active', houseNo: 'Shed 2' },
-    { id: 'FL-103', name: 'Batch 103 - Layer Hy-Line', breed: 'Hy-Line Brown', initialQty: 2000, currentQty: 1980, startDate: '2026-04-15', ageDays: 107, status: 'Active', houseNo: 'Shed 3' }
-  ],
-  products: [
-    { id: 'PRD-001', name: 'Sonali Starter Feed (50kg)', category: 'Feed & Gura', price: 2850, cost: 2600, stock: 120, unit: 'Bag', minStock: 20 },
-    { id: 'PRD-002', name: 'Broiler Finisher Feed (50kg)', category: 'Feed & Gura', price: 3100, cost: 2850, stock: 85, unit: 'Bag', minStock: 15 },
-    { id: 'PRD-003', name: 'Layer Fresh Eggs (Crate 30 pcs)', category: 'Eggs', price: 360, cost: 290, stock: 240, unit: 'Crate', minStock: 50 },
-    { id: 'PRD-004', name: 'Live Sonali Chicken (per KG)', category: 'Live Birds', price: 320, cost: 240, stock: 1450, unit: 'KG', minStock: 200 },
-    { id: 'PRD-005', name: 'Day Old Chicks - Sonali', category: 'Live Birds', price: 42, cost: 32, stock: 500, unit: 'Pcs', minStock: 100 },
-    { id: 'PRD-006', name: 'Poultry Vitamin & Electrolyte', category: 'Medicines', price: 450, cost: 350, stock: 45, unit: 'Bottle', minStock: 10 },
-    { id: 'PRD-007', name: 'Maize Powder (Gura - 50kg)', category: 'Feed & Gura', price: 1850, cost: 1650, stock: 90, unit: 'Bag', minStock: 25 }
-  ],
-  khamariLogs: [
-    { id: 'LOG-001', flockId: 'FL-103', date: '2026-07-28', eggGood: 1620, eggDamaged: 15, feedBags: 4.5, mortality: 2, temperature: 28, notes: 'Normal egg production rate' },
-    { id: 'LOG-002', flockId: 'FL-103', date: '2026-07-29', eggGood: 1645, eggDamaged: 10, feedBags: 4.5, mortality: 1, temperature: 29, notes: 'Slightly higher yield' },
-    { id: 'LOG-003', flockId: 'FL-102', date: '2026-07-29', eggGood: 0, eggDamaged: 0, feedBags: 12.0, mortality: 5, temperature: 30, notes: 'Broiler growth target on track' }
-  ],
-  feedIngredients: [
-    { id: 'ING-01', name: 'Yellow Maize (Gura)', stockKg: 4500, costPerKg: 33 },
-    { id: 'ING-02', name: 'Soybean Meal (44%)', stockKg: 2800, costPerKg: 62 },
-    { id: 'ING-03', name: 'Rice Polish / Bran', stockKg: 1900, costPerKg: 24 },
-    { id: 'ING-04', name: 'Limestone / Calcium', stockKg: 1200, costPerKg: 12 },
-    { id: 'ING-05', name: 'Premix & Enzymes', stockKg: 350, costPerKg: 180 }
-  ],
-  customers: [
-    { id: 'CUST-001', name: 'Walk-in Retail Customer', phone: 'N/A', due: 0, totalPurchases: 15400, address: 'Counter Sale', category: 'খুচরা (Retailer)' },
-    { id: 'CUST-002', name: 'Rahim Wholesale Egg Trader', phone: '01819-112233', due: 4200, totalPurchases: 128000, address: 'Gazipur Sadar Market', category: 'পাইকারী (Wholesale)' },
-    { id: 'CUST-003', name: 'Alam Broiler House', phone: '01712-445566', due: 15000, totalPurchases: 245000, address: 'Tongi Bazar', category: 'ডিলার (Dealer)' }
-  ],
-  suppliers: [
-    { id: 'SUP-001', name: 'Quality Feed Mills Ltd', phone: '01911-998877', balance: 35000, address: 'Dhaka Division' },
-    { id: 'SUP-002', name: 'CP Hatchery Bangladesh', phone: '01812-334455', balance: 0, address: 'Bogura Depot' },
-    { id: 'SUP-003', name: 'Square Agro Veterinary', phone: '01711-223344', balance: 2500, address: 'Pabna Plant' }
-  ],
-  sales: [
-    {
-      id: 'INV-2026-001',
-      date: '2026-07-29T14:30:00',
-      customerId: 'CUST-002',
-      customerName: 'Rahim Wholesale Egg Trader',
-      items: [
-        { id: 'PRD-003', name: 'Layer Fresh Eggs (Crate 30 pcs)', qty: 50, price: 360, unit: 'Crate' }
-      ],
-      subtotal: 18000,
-      discount: 500,
-      grandTotal: 17500,
-      paidAmount: 13300,
-      dueAmount: 4200,
-      paymentMethod: 'Bkash',
-      status: 'Partial'
-    }
-  ],
-  accounting: [
-    { id: 'ACC-01', date: '2026-07-28', type: 'Expense', category: 'Electricity & Utility', amount: 14500, note: 'July Shed Power Bill' },
-    { id: 'ACC-02', date: '2026-07-29', type: 'Expense', category: 'Labor Wages', amount: 12000, note: 'Weekly Caretaker Allowance' },
-    { id: 'ACC-03', date: '2026-07-29', type: 'Income', category: 'Egg Sales', amount: 17500, note: 'Invoice INV-2026-001' }
-  ],
-  loans: [
-    { id: 'LN-01', lender: 'Krishi Bank Farm Loan', amount: 500000, interestRate: 8, emi: 22500, remaining: 380000, nextDueDate: '2026-08-15' }
-  ],
-  installments: [
-    { id: 'INS-01', customerName: 'Alam Broiler House', totalAmount: 45000, paidAmount: 30000, remaining: 15000, installmentCount: 3, nextDate: '2026-08-05' }
-  ],
-  employees: [
-    { id: 'EMP-01', name: 'Malek Hossain', role: 'Farm Manager', salary: 28000, advance: 3000, status: 'Active' },
-    { id: 'EMP-02', name: 'Niyamul Hasan', role: 'Chief Feed Operator', salary: 25000, advance: 0, status: 'Active' },
-    { id: 'EMP-03', name: 'Sultan Ahmed', role: 'Shed Caretaker', salary: 16000, advance: 1500, status: 'Active' }
-  ],
-  batchSales: [
-    { id: 'BS-01', flockId: 'FL-101', date: '2026-07-25', buyerName: 'Alam Poultry Dealer', birdQty: 200, totalWeight: 440, pricePerKg: 210, totalAmount: 92400 }
-  ],
-  batchExpenses: [
-    { id: 'EXP-01', flockId: 'FL-101', date: '2026-06-01', category: 'বাচ্চা বাবদ খরচ', amount: 52500, note: '1500 chicks @ 35 tk' },
-    { id: 'EXP-02', flockId: 'FL-101', date: '2026-06-15', category: 'খাদ্য বাবদ খরচ', amount: 35000, note: 'Starter Feed 14 bags' }
-  ],
-  khamars: [
-    { id: 'KHM-01', name: 'ইব্রাহিম খামার পিটালতলা', ownerName: 'ইব্রাহিম হোসেন', phone: '01711-889900', address: 'পিটালতলা, গাজীপুর', farmType: 'সোনালী', capacity: 3000, notes: 'শেড ১ ও ২ সার্ভিস রানিং' },
-    { id: 'KHM-02', name: 'আখি পোল্ট্রি ফার্ম (প্রধান শাখা)', ownerName: 'নিয়ামুল হাসান', phone: '01700-000000', address: 'খামার রোড, গাজীপুর', farmType: 'ব্রয়লার', capacity: 5000, notes: 'হাই-টেক কন্ট্রোল শেড' }
-  ],
-  customerPayments: [
-    { id: 'PAY-01', customerId: 'CUST-002', date: '2026-07-29', amount: 13300, paymentMethod: 'Bkash', note: 'Invoice INV-2026-001 partial payment' }
-  ],
+  flocks: [],
+  products: [],
+  khamariLogs: [],
+  feedIngredients: [],
+  customers: [],
+  suppliers: [],
+  sales: [],
+  accounting: [],
+  loans: [],
+  installments: [],
+  employees: [],
+  batchSales: [],
+  batchExpenses: [],
+  khamars: [],
+  customerPayments: [],
   posAuthorizedEmails: [
     { id: 'POS-ACC-1', email: 'admin@akhipos.com', name: 'অ্যাডমিন অ্যাকাউন্ট', role: 'Admin', status: 'Active', addedDate: '2026-07-01' },
-    { id: 'POS-ACC-2', email: 'noyon@akhipos.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
-    { id: 'POS-ACC-3', email: 'niyamulhasannoyon@gmail.com', name: 'নিয়ামুল হাসান (মালিক জিমেইল)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
-    { id: 'POS-ACC-4', email: 'niyamulhasan@gmail.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
-    { id: 'POS-ACC-5', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
+    { id: 'POS-ACC-2', email: 'noyon@akhipos.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-3', email: 'niyamulhasannoyon@gmail.com', name: 'নিয়ামুল হাসান (মালিক জিমেইল)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-4', email: 'niyamulhasan@gmail.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-5', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
   ]
 };
+
+// IDs of the old demo/seed records that must never appear in real business data.
+// These only get removed — any real records with different IDs are untouched.
+const DEMO_IDS: Partial<Record<keyof FarmState, string[]>> = {
+  flocks: ['FL-101', 'FL-102', 'FL-103'],
+  products: ['PRD-001', 'PRD-002', 'PRD-003', 'PRD-004', 'PRD-005', 'PRD-006', 'PRD-007'],
+  khamariLogs: ['LOG-001', 'LOG-002', 'LOG-003'],
+  feedIngredients: ['ING-01', 'ING-02', 'ING-03', 'ING-04', 'ING-05'],
+  customers: ['CUST-001', 'CUST-002', 'CUST-003'],
+  suppliers: ['SUP-001', 'SUP-002', 'SUP-003'],
+  sales: ['INV-2026-001'],
+  accounting: ['ACC-01', 'ACC-02', 'ACC-03'],
+  loans: ['LN-01'],
+  installments: ['INS-01'],
+  employees: ['EMP-01', 'EMP-02', 'EMP-03'],
+  batchSales: ['BS-01'],
+  batchExpenses: ['EXP-01', 'EXP-02'],
+  khamars: ['KHM-01', 'KHM-02'],
+  customerPayments: ['PAY-01']
+};
+
+// Strips old demo/seed records from a state snapshot. Idempotent — safe to run
+// repeatedly (e.g. after every cloud sync) and only ever deletes the known demo IDs.
+function purgeDemoData(state: FarmState): { state: FarmState; purged: boolean } {
+  let purged = false;
+  const next: FarmState = { ...state };
+  (Object.keys(DEMO_IDS) as (keyof FarmState)[]).forEach((key) => {
+    const list = next[key];
+    if (Array.isArray(list)) {
+      const ids = DEMO_IDS[key] || [];
+      const filtered = (list as unknown as { id: string }[]).filter(x => !ids.includes(x.id));
+      if (filtered.length !== (list as unknown as unknown[]).length) purged = true;
+      (next as unknown as Record<string, unknown>)[key] = filtered;
+    }
+  });
+  return { state: next, purged };
+}
 
 type Listener = (state: FarmState) => void;
 
@@ -169,7 +139,7 @@ class FarmStore {
         this.broadcastChannel = new BroadcastChannel('AKHI_POS_BROADCAST_CHANNEL');
         this.broadcastChannel.onmessage = (event) => {
           if (event.data && event.data.type === 'REALTIME_STATE_UPDATE' && event.data.state) {
-            this.state = { ...DEFAULT_SEED, ...event.data.state };
+            this.state = purgeDemoData({ ...DEFAULT_SEED, ...event.data.state }).state;
             this.notifyLocal();
           }
         };
@@ -182,7 +152,7 @@ class FarmStore {
     window.addEventListener('storage', (e) => {
       if (e.key === STORAGE_KEY && e.newValue) {
         try {
-          this.state = { ...DEFAULT_SEED, ...JSON.parse(e.newValue) };
+          this.state = purgeDemoData({ ...DEFAULT_SEED, ...JSON.parse(e.newValue) }).state;
           this.notifyLocal();
         } catch (_) {}
       }
@@ -209,7 +179,7 @@ class FarmStore {
     try {
       const item = localStorage.getItem(STORAGE_KEY);
       if (item) {
-        return { ...DEFAULT_SEED, ...JSON.parse(item) };
+        return purgeDemoData({ ...DEFAULT_SEED, ...JSON.parse(item) }).state;
       }
     } catch (e) {
       console.warn('Failed to load local storage state:', e);
@@ -225,7 +195,7 @@ class FarmStore {
         const json = await res.json();
         if (json.success && json.data) {
           const dbData = json.data;
-          this.state = {
+          const merged = {
             ...this.state,
             ...dbData,
             settings: { ...this.state.settings, ...(dbData.settings || {}) },
@@ -246,8 +216,16 @@ class FarmStore {
             customerPayments: dbData.customerPayments && dbData.customerPayments.length > 0 ? dbData.customerPayments : this.state.customerPayments,
             posAuthorizedEmails: dbData.posAuthorizedEmails && dbData.posAuthorizedEmails.length > 0 ? dbData.posAuthorizedEmails : this.state.posAuthorizedEmails,
           };
+          const { state: purgedState, purged } = purgeDemoData(merged);
+          this.state = purgedState;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
           this.notifyLocal();
+          // If any demo rows were purged after merging DB data, push the cleaned
+          // state back so Neon also drops the old demo records (flocks, suppliers,
+          // customers, products get delete-not-in-list cleanup server-side).
+          if (purged) {
+            this.pushToCloudDb();
+          }
           return true;
         }
       }
@@ -405,7 +383,7 @@ class FarmStore {
         const item = localStorage.getItem(SNAPSHOT_KEY);
         if (item) {
           const snapshotState = JSON.parse(item);
-          this.state = { ...DEFAULT_SEED, ...snapshotState };
+          this.state = purgeDemoData({ ...DEFAULT_SEED, ...snapshotState }).state;
           this.saveState();
           return true;
         }
@@ -448,7 +426,7 @@ class FarmStore {
     try {
       const parsed = JSON.parse(jsonStr);
       if (parsed && typeof parsed === 'object') {
-        this.state = { ...DEFAULT_SEED, ...parsed };
+        this.state = purgeDemoData({ ...DEFAULT_SEED, ...parsed }).state;
         this.saveState();
         return true;
       }

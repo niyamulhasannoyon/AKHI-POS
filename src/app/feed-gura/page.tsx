@@ -8,11 +8,18 @@ import { Wheat, Plus, Zap } from 'lucide-react';
 
 export default function FeedGuraPage() {
   const [ingredients, setIngredients] = useState<FeedIngredient[]>([]);
+  const [products, setProducts] = useState<{ id: string; name: string }[]>([]);
   const [batchBags, setBatchBags] = useState<number>(10);
-  const [targetProduct, setTargetProduct] = useState<string>('PRD-001');
+  const [targetProduct, setTargetProduct] = useState<string>('');
 
   useEffect(() => {
-    const update = () => setIngredients(farmStore.getState().feedIngredients || []);
+    const update = () => {
+      const st = farmStore.getState();
+      setIngredients(st.feedIngredients || []);
+      const prods = (st.products || []).map(p => ({ id: p.id, name: p.name }));
+      setProducts(prods);
+      setTargetProduct(prev => (prev && prods.some(p => p.id === prev)) ? prev : (prods.length > 0 ? prods[0].id : ''));
+    };
     update();
     const unsub = farmStore.subscribe(update);
     return () => unsub();
@@ -33,8 +40,8 @@ export default function FeedGuraPage() {
   };
 
   const handleRunBatch = () => {
-    const maize = ingredients.find(i => i.id === 'ING-01');
-    const soy = ingredients.find(i => i.id === 'ING-02');
+    const maize = ingredients.find(i => i.name.toLowerCase().includes('maize'));
+    const soy = ingredients.find(i => i.name.toLowerCase().includes('soy'));
 
     const reqMaize = batchBags * 27.5;
     const reqSoy = batchBags * 15.0;
@@ -117,9 +124,13 @@ export default function FeedGuraPage() {
                   onChange={(e) => setTargetProduct(e.target.value)}
                   className="w-full bg-slate-900/80 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
                 >
-                  <option value="PRD-001">Sonali Starter Feed (50kg Bag)</option>
-                  <option value="PRD-002">Broiler Finisher Feed (50kg Bag)</option>
-                  <option value="PRD-007">Maize Powder (Gura - 50kg Bag)</option>
+                  {products.length === 0 ? (
+                    <option value="">কোন পণ্য নেই — প্রথমে ইনভেন্টরিতে পণ্য যোগ করুন</option>
+                  ) : (
+                    products.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))
+                  )}
                 </select>
               </div>
 
