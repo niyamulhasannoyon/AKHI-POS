@@ -350,7 +350,7 @@ export default function CustomersPage() {
                         </button>
 
                         <button
-                          onClick={() => handleDeleteCustomer(c.id)}
+                          onClick={() => setDeleteCustId(c)}
                           className="p-1.5 bg-white/5 hover:bg-rose-500/20 text-rose-400 rounded-lg transition"
                           title="মুছে ফেলুন"
                         >
@@ -601,7 +601,40 @@ export default function CustomersPage() {
         </div>
       )}
 
-      {/* 3. CUSTOMER SEPARATE DETAILED PROFILE MODAL */}
+      {/* 3. DELETE CUSTOMER CONFIRMATION MODAL */}
+      {deleteCustId && (
+        <div className="bg-[#121620] border border-rose-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-md mx-auto">
+          <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+            <h3 className="text-xl font-bold text-rose-400 flex items-center gap-2">
+              <Trash2 className="w-5 h-5" />
+              <span>কাস্টমার মুছে ফেলবেন?</span>
+            </h3>
+            <button onClick={() => setDeleteCustId(null)} className="text-xs text-gray-400 hover:text-white">✕ বন্ধ করুন</button>
+          </div>
+
+          <p className="text-sm text-gray-300 leading-relaxed">
+            আপনি কি নিশ্চিতভাবে <b className="text-white">{deleteCustId.name}</b> কে মুছে ফেলতে চান? এই কাজটি আর ফেরানো যাবে না।
+          </p>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={confirmDeleteCustomer}
+              className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl shadow-lg text-sm"
+            >
+              হ্যাঁ, মুছে ফেলুন
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeleteCustId(null)}
+              className="px-4 py-3 border border-gray-700 hover:bg-gray-800 text-gray-300 rounded-xl text-sm"
+            >
+              বাতিল
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 4. CUSTOMER SEPARATE DETAILED PROFILE MODAL */}
       {showProfileModal && activeCustomer && (
         <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-4xl mx-auto">
           {/* Header */}
