@@ -18,6 +18,7 @@ import {
   Mail,
   Lock,
   CheckCircle,
+  AlertCircle,
   XCircle,
   Trash2,
   Key
@@ -52,10 +53,19 @@ export default function DashboardPage() {
   const activeBirds = flocks.filter(f => f.status === 'Active').reduce((sum, f) => sum + f.currentQty, 0);
   const todayEggs = khamari[0]?.eggGood || 0;
 
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteEmailId, setDeleteEmailId] = useState<{ id: string; email: string } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
   const handleAddPosEmail = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail.trim() || !newEmail.includes('@')) {
-      return alert('অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা প্রদান করুন');
+      showToast('অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা প্রদান করুন', 'error');
+      return;
     }
 
     const newItem: PosAuthorizedEmail = {
@@ -71,17 +81,20 @@ export default function DashboardPage() {
     setNewEmail('');
     setNewName('');
     setShowAddEmailModal(false);
-    alert(`ইমেইল ${newItem.email} সফলভাবে অনুমোদিত তালিকায় যুক্ত করা হয়েছে!`);
+    showToast(`ইমেইল ${newItem.email} সফলভাবে অনুমোদিত তালিকায় যুক্ত করা হয়েছে!`);
   };
 
   const handleToggleEmailStatus = (id: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
     farmStore.updateItem('posAuthorizedEmails', id, { status: nextStatus });
+    showToast(`ইমেইল স্ট্যাটাস ${nextStatus === 'Active' ? 'সক্রিয় (Active)' : 'নিষ্ক্রিয় (Inactive)'} করা হয়েছে!`);
   };
 
-  const handleDeleteEmail = (id: string, email: string) => {
-    if (confirm(`আপনি কি নিশ্চিত যে ${email} ইমেইলটির POS অ্যাক্সেস বাতিল করতে চান?`)) {
-      farmStore.deleteItem('posAuthorizedEmails', id);
+  const confirmDeleteEmail = () => {
+    if (deleteEmailId) {
+      farmStore.deleteItem('posAuthorizedEmails', deleteEmailId.id);
+      showToast(`ইমেইল ${deleteEmailId.email} বাতিল করা হয়েছে।`);
+      setDeleteEmailId(null);
     }
   };
 
@@ -287,7 +300,7 @@ export default function DashboardPage() {
                     <td className="text-xs text-gray-400">{item.addedDate}</td>
                     <td>
                       <button
-                        onClick={() => handleDeleteEmail(item.id, item.email)}
+                        onClick={() => setDeleteEmailId({ id: item.id, email: item.email })}
                         className="p-1.5 bg-white/5 hover:bg-rose-500/20 text-rose-400 rounded-lg transition"
                         title="অ্যাক্সেস বাতিল করুন"
                       >
@@ -371,6 +384,47 @@ export default function DashboardPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* DELETE EMAIL CONFIRMATION MODAL */}
+      {deleteEmailId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto animate-fadeIn">
+          <div className="bg-[#101522] border border-rose-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 my-auto text-center relative">
+            <div className="w-14 h-14 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 mx-auto flex items-center justify-center">
+              <Trash2 className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">অ্যাক্সেস পারমিশন বাতিল নিশ্চিতকরণ</h3>
+              <p className="text-xs text-gray-300 mt-1">
+                আপনি কি নিশ্চিত যে <span className="font-bold text-white">"{deleteEmailId.email}"</span> ইমেইলটির POS সিস্টেমে প্রবেশাধিকার বাতিল করতে চান?
+              </p>
+            </div>
+            <div className="flex justify-center gap-3 pt-2">
+              <button
+                onClick={() => setDeleteEmailId(null)}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-gray-300 rounded-xl font-bold text-xs transition"
+              >
+                বাতিল
+              </button>
+              <button
+                onClick={confirmDeleteEmail}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-xl text-xs shadow-lg transition"
+              >
+                হ্যাঁ, অ্যাক্সেস বাতিল করুন
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TOAST NOTIFICATION */}
+      {toast && (
+        <div className={`fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl text-sm font-bold border transition-all ${
+          toast.type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200' : 'bg-rose-950/90 border-rose-500/50 text-rose-200'
+        }`}>
+          {toast.type === 'success' ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-rose-400" />}
+          <span>{toast.message}</span>
         </div>
       )}
     </div>

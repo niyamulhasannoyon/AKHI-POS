@@ -2,216 +2,208 @@ import { NextResponse } from 'next/server';
 import { getDbSql } from '@/lib/db';
 import { FarmState, Flock, Product, KhamariLog, FeedIngredient, Customer, Supplier, Sale, AccountingEntry, Loan, Installment, Employee, BatchSale, BatchExpense, KhamarProfile, CustomerPayment, PosAuthorizedEmail } from '@/lib/types';
 
+let tablesEnsured = false;
+
 async function ensureTablesExist(sql: ReturnType<typeof getDbSql>) {
-  await sql`
-    CREATE TABLE IF NOT EXISTS settings (
-      id VARCHAR(50) PRIMARY KEY DEFAULT 'default',
-      farm_name VARCHAR(255) NOT NULL,
-      phone VARCHAR(50),
-      address TEXT,
-      currency VARCHAR(10) DEFAULT '৳',
-      tax_rate NUMERIC(5,2) DEFAULT 0,
-      printer_width VARCHAR(20) DEFAULT '80mm',
-      theme VARCHAR(20) DEFAULT 'dark'
-    );
-  `;
+  if (tablesEnsured) return;
 
-  await sql`
-    CREATE TABLE IF NOT EXISTS flocks (
-      id VARCHAR(50) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      breed VARCHAR(100),
-      company_name VARCHAR(255),
-      unit_price NUMERIC(12,2),
-      initial_qty INT DEFAULT 0,
-      current_qty INT DEFAULT 0,
-      start_date DATE,
-      age_days INT DEFAULT 0,
-      status VARCHAR(50) DEFAULT 'Active',
-      house_no VARCHAR(50)
-    );
-  `;
+  await Promise.all([
+    sql`
+      CREATE TABLE IF NOT EXISTS settings (
+        id VARCHAR(50) PRIMARY KEY DEFAULT 'default',
+        farm_name VARCHAR(255) NOT NULL,
+        phone VARCHAR(50),
+        address TEXT,
+        currency VARCHAR(10) DEFAULT '৳',
+        tax_rate NUMERIC(5,2) DEFAULT 0,
+        printer_width VARCHAR(20) DEFAULT '80mm',
+        theme VARCHAR(20) DEFAULT 'dark'
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS flocks (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        breed VARCHAR(100),
+        company_name VARCHAR(255),
+        unit_price NUMERIC(12,2),
+        initial_qty INT DEFAULT 0,
+        current_qty INT DEFAULT 0,
+        start_date DATE,
+        age_days INT DEFAULT 0,
+        status VARCHAR(50) DEFAULT 'Active',
+        house_no VARCHAR(50)
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS products (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        category VARCHAR(100),
+        price NUMERIC(12,2) NOT NULL,
+        cost NUMERIC(12,2) NOT NULL,
+        stock NUMERIC(12,2) DEFAULT 0,
+        unit VARCHAR(50),
+        min_stock NUMERIC(12,2) DEFAULT 0
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS khamari_logs (
+        id VARCHAR(50) PRIMARY KEY,
+        flock_id VARCHAR(50),
+        log_date DATE NOT NULL,
+        egg_good INT DEFAULT 0,
+        egg_damaged INT DEFAULT 0,
+        feed_bags NUMERIC(10,2) DEFAULT 0,
+        mortality INT DEFAULT 0,
+        temperature NUMERIC(5,2),
+        notes TEXT
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS feed_ingredients (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        stock_kg NUMERIC(12,2) DEFAULT 0,
+        cost_per_kg NUMERIC(12,2) DEFAULT 0
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS customers (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(50),
+        due NUMERIC(12,2) DEFAULT 0,
+        total_purchases NUMERIC(12,2) DEFAULT 0,
+        address TEXT,
+        category VARCHAR(100),
+        email VARCHAR(255)
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS suppliers (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(50),
+        balance NUMERIC(12,2) DEFAULT 0,
+        address TEXT
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS sales (
+        id VARCHAR(50) PRIMARY KEY,
+        sale_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        customer_id VARCHAR(50),
+        customer_name VARCHAR(255),
+        items JSONB NOT NULL,
+        subtotal NUMERIC(12,2) NOT NULL,
+        discount NUMERIC(12,2) DEFAULT 0,
+        grand_total NUMERIC(12,2) NOT NULL,
+        paid_amount NUMERIC(12,2) NOT NULL,
+        due_amount NUMERIC(12,2) DEFAULT 0,
+        payment_method VARCHAR(50) DEFAULT 'Cash',
+        status VARCHAR(50) DEFAULT 'Paid'
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS accounting (
+        id VARCHAR(50) PRIMARY KEY,
+        entry_date DATE NOT NULL,
+        entry_type VARCHAR(20) NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        amount NUMERIC(12,2) NOT NULL,
+        note TEXT
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS loans (
+        id VARCHAR(50) PRIMARY KEY,
+        lender VARCHAR(255) NOT NULL,
+        amount NUMERIC(12,2) NOT NULL,
+        interest_rate NUMERIC(5,2) DEFAULT 0,
+        emi NUMERIC(12,2) DEFAULT 0,
+        remaining NUMERIC(12,2) NOT NULL,
+        next_due_date DATE
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS installments (
+        id VARCHAR(50) PRIMARY KEY,
+        customer_name VARCHAR(255) NOT NULL,
+        total_amount NUMERIC(12,2) NOT NULL,
+        paid_amount NUMERIC(12,2) DEFAULT 0,
+        remaining NUMERIC(12,2) NOT NULL,
+        installment_count INT DEFAULT 1,
+        next_date DATE
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS employees (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        role VARCHAR(100),
+        salary NUMERIC(12,2) NOT NULL,
+        advance NUMERIC(12,2) DEFAULT 0,
+        status VARCHAR(50) DEFAULT 'Active'
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS batch_sales (
+        id VARCHAR(50) PRIMARY KEY,
+        flock_id VARCHAR(50),
+        sale_date DATE NOT NULL,
+        buyer_name VARCHAR(255),
+        bird_qty INT DEFAULT 0,
+        total_weight NUMERIC(12,2) DEFAULT 0,
+        price_per_kg NUMERIC(12,2) DEFAULT 0,
+        total_amount NUMERIC(12,2) DEFAULT 0
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS batch_expenses (
+        id VARCHAR(50) PRIMARY KEY,
+        flock_id VARCHAR(50),
+        exp_date DATE NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        amount NUMERIC(12,2) NOT NULL,
+        note TEXT
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS khamars (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        owner_name VARCHAR(255),
+        phone VARCHAR(50),
+        address TEXT,
+        farm_type VARCHAR(50),
+        capacity INT DEFAULT 0,
+        notes TEXT
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS customer_payments (
+        id VARCHAR(50) PRIMARY KEY,
+        customer_id VARCHAR(50),
+        pay_date DATE NOT NULL,
+        amount NUMERIC(12,2) NOT NULL,
+        payment_method VARCHAR(50),
+        note TEXT
+      );
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS pos_authorized_emails (
+        id VARCHAR(50) PRIMARY KEY,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        name VARCHAR(255),
+        role VARCHAR(50),
+        status VARCHAR(20) DEFAULT 'Active',
+        added_date DATE
+      );
+    `
+  ]);
 
-  await sql`
-    CREATE TABLE IF NOT EXISTS products (
-      id VARCHAR(50) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      category VARCHAR(100),
-      price NUMERIC(12,2) NOT NULL,
-      cost NUMERIC(12,2) NOT NULL,
-      stock NUMERIC(12,2) DEFAULT 0,
-      unit VARCHAR(50),
-      min_stock NUMERIC(12,2) DEFAULT 0
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS khamari_logs (
-      id VARCHAR(50) PRIMARY KEY,
-      flock_id VARCHAR(50),
-      log_date DATE NOT NULL,
-      egg_good INT DEFAULT 0,
-      egg_damaged INT DEFAULT 0,
-      feed_bags NUMERIC(10,2) DEFAULT 0,
-      mortality INT DEFAULT 0,
-      temperature NUMERIC(5,2),
-      notes TEXT
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS feed_ingredients (
-      id VARCHAR(50) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      stock_kg NUMERIC(12,2) DEFAULT 0,
-      cost_per_kg NUMERIC(12,2) DEFAULT 0
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS customers (
-      id VARCHAR(50) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      phone VARCHAR(50),
-      due NUMERIC(12,2) DEFAULT 0,
-      total_purchases NUMERIC(12,2) DEFAULT 0,
-      address TEXT,
-      category VARCHAR(100),
-      email VARCHAR(255)
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS suppliers (
-      id VARCHAR(50) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      phone VARCHAR(50),
-      balance NUMERIC(12,2) DEFAULT 0,
-      address TEXT
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS sales (
-      id VARCHAR(50) PRIMARY KEY,
-      sale_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      customer_id VARCHAR(50),
-      customer_name VARCHAR(255),
-      items JSONB NOT NULL,
-      subtotal NUMERIC(12,2) NOT NULL,
-      discount NUMERIC(12,2) DEFAULT 0,
-      grand_total NUMERIC(12,2) NOT NULL,
-      paid_amount NUMERIC(12,2) NOT NULL,
-      due_amount NUMERIC(12,2) DEFAULT 0,
-      payment_method VARCHAR(50) DEFAULT 'Cash',
-      status VARCHAR(50) DEFAULT 'Paid'
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS accounting (
-      id VARCHAR(50) PRIMARY KEY,
-      entry_date DATE NOT NULL,
-      entry_type VARCHAR(20) NOT NULL,
-      category VARCHAR(100) NOT NULL,
-      amount NUMERIC(12,2) NOT NULL,
-      note TEXT
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS loans (
-      id VARCHAR(50) PRIMARY KEY,
-      lender VARCHAR(255) NOT NULL,
-      amount NUMERIC(12,2) NOT NULL,
-      interest_rate NUMERIC(5,2) DEFAULT 0,
-      emi NUMERIC(12,2) DEFAULT 0,
-      remaining NUMERIC(12,2) NOT NULL,
-      next_due_date DATE
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS installments (
-      id VARCHAR(50) PRIMARY KEY,
-      customer_name VARCHAR(255) NOT NULL,
-      total_amount NUMERIC(12,2) NOT NULL,
-      paid_amount NUMERIC(12,2) DEFAULT 0,
-      remaining NUMERIC(12,2) NOT NULL,
-      installment_count INT DEFAULT 1,
-      next_date DATE
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS employees (
-      id VARCHAR(50) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      role VARCHAR(100),
-      salary NUMERIC(12,2) NOT NULL,
-      advance NUMERIC(12,2) DEFAULT 0,
-      status VARCHAR(50) DEFAULT 'Active'
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS batch_sales (
-      id VARCHAR(50) PRIMARY KEY,
-      flock_id VARCHAR(50),
-      sale_date DATE NOT NULL,
-      buyer_name VARCHAR(255),
-      bird_qty INT DEFAULT 0,
-      total_weight NUMERIC(12,2) DEFAULT 0,
-      price_per_kg NUMERIC(12,2) DEFAULT 0,
-      total_amount NUMERIC(12,2) DEFAULT 0
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS batch_expenses (
-      id VARCHAR(50) PRIMARY KEY,
-      flock_id VARCHAR(50),
-      exp_date DATE NOT NULL,
-      category VARCHAR(100) NOT NULL,
-      amount NUMERIC(12,2) NOT NULL,
-      note TEXT
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS khamars (
-      id VARCHAR(50) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      owner_name VARCHAR(255),
-      phone VARCHAR(50),
-      address TEXT,
-      farm_type VARCHAR(50),
-      capacity INT DEFAULT 0,
-      notes TEXT
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS customer_payments (
-      id VARCHAR(50) PRIMARY KEY,
-      customer_id VARCHAR(50),
-      pay_date DATE NOT NULL,
-      amount NUMERIC(12,2) NOT NULL,
-      payment_method VARCHAR(50),
-      note TEXT
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS pos_authorized_emails (
-      id VARCHAR(50) PRIMARY KEY,
-      email VARCHAR(255) NOT NULL UNIQUE,
-      name VARCHAR(255),
-      role VARCHAR(50),
-      status VARCHAR(20) DEFAULT 'Active',
-      added_date DATE
-    );
-  `;
+  tablesEnsured = true;
 }
 
 export async function GET() {
@@ -289,10 +281,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Empty payload' }, { status: 400 });
     }
 
+    const tasks: Promise<unknown>[] = [];
+
+    // Sync Settings
+    if (body.settings) {
+      const s = body.settings;
+      tasks.push(sql`
+        INSERT INTO settings (id, farm_name, phone, address, currency, tax_rate, printer_width, theme)
+        VALUES ('default', ${s.farmName}, ${s.phone}, ${s.address}, ${s.currency}, ${s.taxRate}, ${s.printerWidth}, ${s.theme})
+        ON CONFLICT (id) DO UPDATE SET
+          farm_name = EXCLUDED.farm_name,
+          phone = EXCLUDED.phone,
+          address = EXCLUDED.address,
+          currency = EXCLUDED.currency,
+          tax_rate = EXCLUDED.tax_rate,
+          printer_width = EXCLUDED.printer_width,
+          theme = EXCLUDED.theme;
+      `);
+    }
+
     // Sync Flocks
     if (Array.isArray(body.flocks)) {
-      for (const f of body.flocks) {
-        await sql`
+      body.flocks.forEach(f => {
+        tasks.push(sql`
           INSERT INTO flocks (id, name, breed, company_name, unit_price, initial_qty, current_qty, start_date, age_days, status, house_no)
           VALUES (${f.id}, ${f.name}, ${f.breed}, ${f.companyName || null}, ${f.unitPrice || null}, ${f.initialQty}, ${f.currentQty}, ${f.startDate}, ${f.ageDays}, ${f.status}, ${f.houseNo})
           ON CONFLICT (id) DO UPDATE SET
@@ -306,14 +317,14 @@ export async function POST(request: Request) {
             age_days = EXCLUDED.age_days,
             status = EXCLUDED.status,
             house_no = EXCLUDED.house_no;
-        `;
-      }
+        `);
+      });
     }
 
     // Sync Products
     if (Array.isArray(body.products)) {
-      for (const p of body.products) {
-        await sql`
+      body.products.forEach(p => {
+        tasks.push(sql`
           INSERT INTO products (id, name, category, price, cost, stock, unit, min_stock)
           VALUES (${p.id}, ${p.name}, ${p.category}, ${p.price}, ${p.cost}, ${p.stock}, ${p.unit}, ${p.minStock})
           ON CONFLICT (id) DO UPDATE SET
@@ -324,14 +335,14 @@ export async function POST(request: Request) {
             stock = EXCLUDED.stock,
             unit = EXCLUDED.unit,
             min_stock = EXCLUDED.min_stock;
-        `;
-      }
+        `);
+      });
     }
 
     // Sync Customers
     if (Array.isArray(body.customers)) {
-      for (const c of body.customers) {
-        await sql`
+      body.customers.forEach(c => {
+        tasks.push(sql`
           INSERT INTO customers (id, name, phone, due, total_purchases, address, category, email)
           VALUES (${c.id}, ${c.name}, ${c.phone}, ${c.due}, ${c.totalPurchases}, ${c.address || null}, ${c.category || null}, ${c.email || null})
           ON CONFLICT (id) DO UPDATE SET
@@ -342,14 +353,14 @@ export async function POST(request: Request) {
             address = EXCLUDED.address,
             category = EXCLUDED.category,
             email = EXCLUDED.email;
-        `;
-      }
+        `);
+      });
     }
 
     // Sync Suppliers
     if (Array.isArray(body.suppliers)) {
-      for (const s of body.suppliers) {
-        await sql`
+      body.suppliers.forEach(s => {
+        tasks.push(sql`
           INSERT INTO suppliers (id, name, phone, balance, address)
           VALUES (${s.id}, ${s.name}, ${s.phone}, ${s.balance}, ${s.address || null})
           ON CONFLICT (id) DO UPDATE SET
@@ -357,14 +368,50 @@ export async function POST(request: Request) {
             phone = EXCLUDED.phone,
             balance = EXCLUDED.balance,
             address = EXCLUDED.address;
-        `;
-      }
+        `);
+      });
+    }
+
+    // Sync Sales
+    if (Array.isArray(body.sales)) {
+      body.sales.forEach(s => {
+        tasks.push(sql`
+          INSERT INTO sales (id, sale_date, customer_id, customer_name, items, subtotal, discount, grand_total, paid_amount, due_amount, payment_method, status)
+          VALUES (${s.id}, ${s.date}, ${s.customerId}, ${s.customerName}, ${JSON.stringify(s.items)}, ${s.subtotal}, ${s.discount}, ${s.grandTotal}, ${s.paidAmount}, ${s.dueAmount}, ${s.paymentMethod}, ${s.status})
+          ON CONFLICT (id) DO UPDATE SET
+            customer_id = EXCLUDED.customer_id,
+            customer_name = EXCLUDED.customer_name,
+            items = EXCLUDED.items,
+            subtotal = EXCLUDED.subtotal,
+            discount = EXCLUDED.discount,
+            grand_total = EXCLUDED.grand_total,
+            paid_amount = EXCLUDED.paid_amount,
+            due_amount = EXCLUDED.due_amount,
+            payment_method = EXCLUDED.payment_method,
+            status = EXCLUDED.status;
+        `);
+      });
+    }
+
+    // Sync Accounting
+    if (Array.isArray(body.accounting)) {
+      body.accounting.forEach(a => {
+        tasks.push(sql`
+          INSERT INTO accounting (id, entry_date, entry_type, category, amount, note)
+          VALUES (${a.id}, ${a.date}, ${a.type}, ${a.category}, ${a.amount}, ${a.note || null})
+          ON CONFLICT (id) DO UPDATE SET
+            entry_type = EXCLUDED.entry_type,
+            category = EXCLUDED.category,
+            amount = EXCLUDED.amount,
+            note = EXCLUDED.note;
+        `);
+      });
     }
 
     // Sync Batch Sales
     if (Array.isArray(body.batchSales)) {
-      for (const bs of body.batchSales) {
-        await sql`
+      body.batchSales.forEach(bs => {
+        tasks.push(sql`
           INSERT INTO batch_sales (id, flock_id, sale_date, buyer_name, bird_qty, total_weight, price_per_kg, total_amount)
           VALUES (${bs.id}, ${bs.flockId}, ${bs.date}, ${bs.buyerName}, ${bs.birdQty}, ${bs.totalWeight}, ${bs.pricePerKg}, ${bs.totalAmount})
           ON CONFLICT (id) DO UPDATE SET
@@ -373,28 +420,28 @@ export async function POST(request: Request) {
             total_weight = EXCLUDED.total_weight,
             price_per_kg = EXCLUDED.price_per_kg,
             total_amount = EXCLUDED.total_amount;
-        `;
-      }
+        `);
+      });
     }
 
     // Sync Batch Expenses
     if (Array.isArray(body.batchExpenses)) {
-      for (const be of body.batchExpenses) {
-        await sql`
+      body.batchExpenses.forEach(be => {
+        tasks.push(sql`
           INSERT INTO batch_expenses (id, flock_id, exp_date, category, amount, note)
           VALUES (${be.id}, ${be.flockId}, ${be.date}, ${be.category}, ${be.amount}, ${be.note || null})
           ON CONFLICT (id) DO UPDATE SET
             category = EXCLUDED.category,
             amount = EXCLUDED.amount,
             note = EXCLUDED.note;
-        `;
-      }
+        `);
+      });
     }
 
     // Sync POS Authorized Emails
     if (Array.isArray(body.posAuthorizedEmails)) {
-      for (const pe of body.posAuthorizedEmails) {
-        await sql`
+      body.posAuthorizedEmails.forEach(pe => {
+        tasks.push(sql`
           INSERT INTO pos_authorized_emails (id, email, name, role, status, added_date)
           VALUES (${pe.id}, ${pe.email}, ${pe.name}, ${pe.role}, ${pe.status}, ${pe.addedDate})
           ON CONFLICT (id) DO UPDATE SET
@@ -402,9 +449,12 @@ export async function POST(request: Request) {
             name = EXCLUDED.name,
             role = EXCLUDED.role,
             status = EXCLUDED.status;
-        `;
-      }
+        `);
+      });
     }
+
+    // Run all tasks concurrently
+    await Promise.all(tasks);
 
     return NextResponse.json({ success: true, message: 'Synced state to Neon PostgreSQL successfully' });
   } catch (error: unknown) {
@@ -412,3 +462,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: errMessage }, { status: 500 });
   }
 }
+

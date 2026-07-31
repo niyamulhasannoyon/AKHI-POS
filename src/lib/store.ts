@@ -147,12 +147,61 @@ type Listener = (state: FarmState) => void;
 class FarmStore {
   private state: FarmState;
   private listeners: Listener[] = [];
+  private broadcastChannel: BroadcastChannel | null = null;
+  private pushTimer: ReturnType<typeof setTimeout> | null = null;
+  private pollInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.state = DEFAULT_SEED;
     if (typeof window !== 'undefined') {
       this.state = this.loadFromLocalStorage();
+      this.initRealtimeListeners();
       this.syncWithCloudDb();
+    }
+  }
+
+  private initRealtimeListeners() {
+    if (typeof window === 'undefined') return;
+
+    // 1. HTML5 BroadcastChannel for multi-tab real-time sync
+    try {
+      if ('BroadcastChannel' in window) {
+        this.broadcastChannel = new BroadcastChannel('AKHI_POS_BROADCAST_CHANNEL');
+        this.broadcastChannel.onmessage = (event) => {
+          if (event.data && event.data.type === 'REALTIME_STATE_UPDATE' && event.data.state) {
+            this.state = { ...DEFAULT_SEED, ...event.data.state };
+            this.notifyLocal();
+          }
+        };
+      }
+    } catch (e) {
+      console.warn('BroadcastChannel initialization failed:', e);
+    }
+
+    // 2. Storage event listener fallback for cross-tab updates
+    window.addEventListener('storage', (e) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          this.state = { ...DEFAULT_SEED, ...JSON.parse(e.newValue) };
+          this.notifyLocal();
+        } catch (_) {}
+      }
+    });
+
+    // 3. Document visibility change listener to pull updates on tab focus
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        this.syncWithCloudDb();
+      }
+    });
+
+    // 4. Periodic background polling every 15 seconds when active
+    if (!this.pollInterval) {
+      this.pollInterval = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          this.syncWithCloudDb();
+        }
+      }, 15000);
     }
   }
 
@@ -184,15 +233,21 @@ class FarmStore {
             products: dbData.products && dbData.products.length > 0 ? dbData.products : this.state.products,
             customers: dbData.customers && dbData.customers.length > 0 ? dbData.customers : this.state.customers,
             suppliers: dbData.suppliers && dbData.suppliers.length > 0 ? dbData.suppliers : this.state.suppliers,
+            sales: dbData.sales && dbData.sales.length > 0 ? dbData.sales : this.state.sales,
+            accounting: dbData.accounting && dbData.accounting.length > 0 ? dbData.accounting : this.state.accounting,
+            khamariLogs: dbData.khamariLogs && dbData.khamariLogs.length > 0 ? dbData.khamariLogs : this.state.khamariLogs,
+            feedIngredients: dbData.feedIngredients && dbData.feedIngredients.length > 0 ? dbData.feedIngredients : this.state.feedIngredients,
+            loans: dbData.loans && dbData.loans.length > 0 ? dbData.loans : this.state.loans,
+            installments: dbData.installments && dbData.installments.length > 0 ? dbData.installments : this.state.installments,
+            employees: dbData.employees && dbData.employees.length > 0 ? dbData.employees : this.state.employees,
             batchSales: dbData.batchSales && dbData.batchSales.length > 0 ? dbData.batchSales : this.state.batchSales,
             batchExpenses: dbData.batchExpenses && dbData.batchExpenses.length > 0 ? dbData.batchExpenses : this.state.batchExpenses,
+            khamars: dbData.khamars && dbData.khamars.length > 0 ? dbData.khamars : this.state.khamars,
+            customerPayments: dbData.customerPayments && dbData.customerPayments.length > 0 ? dbData.customerPayments : this.state.customerPayments,
             posAuthorizedEmails: dbData.posAuthorizedEmails && dbData.posAuthorizedEmails.length > 0 ? dbData.posAuthorizedEmails : this.state.posAuthorizedEmails,
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
-          this.notify();
-
-          // Also push back local additions to DB
-          this.pushToCloudDb();
+          this.notifyLocal();
           return true;
         }
       }
@@ -215,16 +270,33 @@ class FarmStore {
     }
   }
 
+  private debouncePushToCloud() {
+    if (this.pushTimer) {
+      clearTimeout(this.pushTimer);
+    }
+    this.pushTimer = setTimeout(() => {
+      this.pushToCloudDb();
+    }, 800);
+  }
+
   public getState(): FarmState {
     return this.state;
   }
 
-  public saveState() {
+  public saveState(broadcast = true) {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
-        this.notify();
-        this.pushToCloudDb();
+        this.notifyLocal();
+
+        if (broadcast && this.broadcastChannel) {
+          this.broadcastChannel.postMessage({
+            type: 'REALTIME_STATE_UPDATE',
+            state: this.state
+          });
+        }
+
+        this.debouncePushToCloud();
       } catch (e) {
         console.error('Error saving state to localStorage:', e);
       }
@@ -238,9 +310,10 @@ class FarmStore {
     };
   }
 
-  private notify() {
+  private notifyLocal() {
     this.listeners.forEach(l => l(this.state));
   }
+
 
   public setCurrentUser(user: any) {
     this.state = { ...this.state, currentUser: user };
@@ -348,7 +421,13 @@ class FarmStore {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(EMPTY_STATE));
-        this.notify();
+        this.notifyLocal();
+        if (this.broadcastChannel) {
+          this.broadcastChannel.postMessage({
+            type: 'REALTIME_STATE_UPDATE',
+            state: EMPTY_STATE
+          });
+        }
       } catch (e) {
         console.error('Error clearing data:', e);
       }

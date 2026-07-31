@@ -126,10 +126,13 @@ export interface Installment {
 export interface Employee {
   id: string;
   name: string;
+  phone?: string;
   role: string;
   salary: number;
   advance: number;
+  joiningDate?: string;
   status: 'Active' | 'On Leave' | 'Terminated';
+  notes?: string;
 }
 
 export interface KhamarProfile {
