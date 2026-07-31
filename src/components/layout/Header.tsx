@@ -17,6 +17,8 @@ export default function Header({ onToggleMobileSidebar, onOpenAuthModal }: Heade
   const [lowStockCount, setLowStockCount] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
+  const [hasSnapshot, setHasSnapshot] = useState<boolean>(false);
+
   useEffect(() => {
     const updateStats = () => {
       const state = farmStore.getState();
@@ -25,6 +27,7 @@ export default function Header({ onToggleMobileSidebar, onOpenAuthModal }: Heade
       setActiveFlocksCount(activeFlocks);
       setLowStockCount(lowStock);
       setCurrentUser(state.currentUser || null);
+      setHasSnapshot(farmStore.hasPreResetSnapshot());
     };
 
     updateStats();
@@ -88,10 +91,23 @@ export default function Header({ onToggleMobileSidebar, onOpenAuthModal }: Heade
   };
 
   const handleResetAllData = () => {
-    if (confirm('আপনি কি নিশ্চিত যে সমস্ত ডেমো ডেটা মুছে ফেলে রিয়েল কাজের জন্য সিস্টেম রিসেট করতে চান? (এই অ্যাকশনটি ব্যাকআপ না নিয়ে ফিরিয়ে আনা যাবে না)')) {
+    if (confirm('আপনি কি নিশ্চিত যে সমস্ত ডেটা মুছে ফেলে রিসেট করতে চান? (চিন্তার কিছু নেই! আপনার আগের সমস্ত ডেটা স্বয়ংক্রিয় ব্যাকআপ হিসেবে জমা থাকবে এবং যেকোনো সময় "পূর্বের ডেটায় ফিরুন" বাটনে চেপে তা ফিরিয়ে আনতে পারবেন)')) {
       farmStore.clearAllData();
-      alert('সফলভাবে সমস্ত ডেমো ডেটা রিসেট করা হয়েছে! আপনি এখন আসল ডেটা নিয়ে কাজ করতে পারবেন।');
+      setHasSnapshot(true);
+      alert('সফলভাবে রিসেট করা হয়েছে! আগের ডেটা ফিরিয়ে আনতে ওপরের "↩️ রিসেট আনডু" বাটনে ক্লিক করুন।');
       location.reload();
+    }
+  };
+
+  const handleRestoreSnapshot = () => {
+    if (confirm('আপনি কি রিসেট করার আগের সমস্ত ডেটা ব্যাকআপ থেকে ফিরে আনতে চান?')) {
+      const success = farmStore.restorePreResetSnapshot();
+      if (success) {
+        alert('সাফল্যের সাথে আপনার রিসেট করার আগের সমস্ত ডেটা ব্যাকআপ থেকে ফিরিয়ে আনা হয়েছে!');
+        location.reload();
+      } else {
+        alert('কোন ব্যাকআপ স্ন্যাপশট খুঁজে পাওয়া যায়নি');
+      }
     }
   };
 
@@ -159,11 +175,22 @@ export default function Header({ onToggleMobileSidebar, onOpenAuthModal }: Heade
         <button 
           onClick={handleResetAllData} 
           className="flex items-center gap-1.5 px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 rounded-lg font-bold transition text-[11px] sm:text-xs"
-          title="সমস্ত ডেমো ডেটা মুছে ফেলে রিয়েল কাজের জন্য সিস্টেম পরিষ্কার করুন"
+          title="সমস্ত ডেটা মুছে রিসেট করুন (পূর্বের ডেটা স্বয়ংক্রিয় ব্যাকআপ হিসেবে সেভ থাকবে)"
         >
           <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
           <span>রিসেট</span>
         </button>
+
+        {hasSnapshot && (
+          <button 
+            onClick={handleRestoreSnapshot} 
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 rounded-lg font-extrabold transition text-[11px] sm:text-xs shadow-lg shadow-amber-950/40 animate-pulse"
+            title="রিসেট করার আগের সমস্ত ডেটা ব্যাকআপ থেকে পুনরুদ্ধার করুন"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+            <span>↩️ রিসেট আনডু</span>
+          </button>
+        )}
 
         {/* Google Logged-In User Profile or Login Button */}
         {currentUser ? (

@@ -3,6 +3,7 @@
 import { FarmState } from './types';
 
 const STORAGE_KEY = 'AKHI_POULTRY_NEXTJS_DATA_V4';
+const SNAPSHOT_KEY = 'AKHI_POULTRY_PRE_RESET_SNAPSHOT';
 
 export const EMPTY_STATE: FarmState = {
   settings: {
@@ -282,7 +283,49 @@ class FarmStore {
     }
   }
 
+  public createSnapshot(): boolean {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(this.state));
+        return true;
+      } catch (e) {
+        console.error('Failed to create pre-reset snapshot:', e);
+      }
+    }
+    return false;
+  }
+
+  public hasPreResetSnapshot(): boolean {
+    if (typeof window !== 'undefined') {
+      try {
+        const item = localStorage.getItem(SNAPSHOT_KEY);
+        return !!item;
+      } catch (e) {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  public restorePreResetSnapshot(): boolean {
+    if (typeof window !== 'undefined') {
+      try {
+        const item = localStorage.getItem(SNAPSHOT_KEY);
+        if (item) {
+          const snapshotState = JSON.parse(item);
+          this.state = { ...DEFAULT_SEED, ...snapshotState };
+          this.saveState();
+          return true;
+        }
+      } catch (e) {
+        console.error('Failed to restore snapshot:', e);
+      }
+    }
+    return false;
+  }
+
   public clearAllData() {
+    this.createSnapshot();
     this.state = { ...EMPTY_STATE };
     if (typeof window !== 'undefined') {
       try {
