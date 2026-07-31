@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { farmStore } from '@/lib/store';
+import { farmStore, EMPTY_STATE } from '@/lib/store';
 import { FarmState, PosAuthorizedEmail } from '@/lib/types';
 import { formatCurrency, calculateFlockAgeDays } from '@/lib/utils';
 import { 
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const [state, setState] = useState<FarmState>(farmStore.getState());
+  const [state, setState] = useState<FarmState>(EMPTY_STATE);
 
   // POS Access Control Form State
   const [newEmail, setNewEmail] = useState('');
@@ -33,6 +33,7 @@ export default function DashboardPage() {
   const [showAddEmailModal, setShowAddEmailModal] = useState(false);
 
   useEffect(() => {
+    setState(farmStore.getState());
     const unsub = farmStore.subscribe((s) => setState({ ...s }));
     return () => unsub();
   }, []);
