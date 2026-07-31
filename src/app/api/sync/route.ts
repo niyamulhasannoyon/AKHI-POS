@@ -339,8 +339,35 @@ export async function POST(request: Request) {
       });
     }
 
+    // Sync POS Authorized Emails
+    if (Array.isArray(body.posAuthorizedEmails)) {
+      const validIds = body.posAuthorizedEmails.map(pe => pe.id).filter(Boolean);
+      if (validIds.length > 0) {
+        tasks.push(sql`DELETE FROM pos_authorized_emails WHERE NOT (id = ANY(${validIds}))`);
+      } else {
+        tasks.push(sql`DELETE FROM pos_authorized_emails`);
+      }
+      body.posAuthorizedEmails.forEach(pe => {
+        tasks.push(sql`
+          INSERT INTO pos_authorized_emails (id, email, name, role, status, added_date)
+          VALUES (${pe.id}, ${pe.email}, ${pe.name}, ${pe.role}, ${pe.status}, ${pe.addedDate})
+          ON CONFLICT (id) DO UPDATE SET
+            email = EXCLUDED.email,
+            name = EXCLUDED.name,
+            role = EXCLUDED.role,
+            status = EXCLUDED.status;
+        `);
+      });
+    }
+
     // Sync Customers
     if (Array.isArray(body.customers)) {
+      const validIds = body.customers.map(c => c.id).filter(Boolean);
+      if (validIds.length > 0) {
+        tasks.push(sql`DELETE FROM customers WHERE NOT (id = ANY(${validIds}))`);
+      } else {
+        tasks.push(sql`DELETE FROM customers`);
+      }
       body.customers.forEach(c => {
         tasks.push(sql`
           INSERT INTO customers (id, name, phone, due, total_purchases, address, category, email)
@@ -357,98 +384,26 @@ export async function POST(request: Request) {
       });
     }
 
-    // Sync Suppliers
-    if (Array.isArray(body.suppliers)) {
-      body.suppliers.forEach(s => {
+    // Sync Products
+    if (Array.isArray(body.products)) {
+      const validIds = body.products.map(p => p.id).filter(Boolean);
+      if (validIds.length > 0) {
+        tasks.push(sql`DELETE FROM products WHERE NOT (id = ANY(${validIds}))`);
+      } else {
+        tasks.push(sql`DELETE FROM products`);
+      }
+      body.products.forEach(p => {
         tasks.push(sql`
-          INSERT INTO suppliers (id, name, phone, balance, address)
-          VALUES (${s.id}, ${s.name}, ${s.phone}, ${s.balance}, ${s.address || null})
+          INSERT INTO products (id, name, category, price, cost, stock, unit, min_stock)
+          VALUES (${p.id}, ${p.name}, ${p.category}, ${p.price}, ${p.cost}, ${p.stock}, ${p.unit}, ${p.minStock})
           ON CONFLICT (id) DO UPDATE SET
             name = EXCLUDED.name,
-            phone = EXCLUDED.phone,
-            balance = EXCLUDED.balance,
-            address = EXCLUDED.address;
-        `);
-      });
-    }
-
-    // Sync Sales
-    if (Array.isArray(body.sales)) {
-      body.sales.forEach(s => {
-        tasks.push(sql`
-          INSERT INTO sales (id, sale_date, customer_id, customer_name, items, subtotal, discount, grand_total, paid_amount, due_amount, payment_method, status)
-          VALUES (${s.id}, ${s.date}, ${s.customerId}, ${s.customerName}, ${JSON.stringify(s.items)}, ${s.subtotal}, ${s.discount}, ${s.grandTotal}, ${s.paidAmount}, ${s.dueAmount}, ${s.paymentMethod}, ${s.status})
-          ON CONFLICT (id) DO UPDATE SET
-            customer_id = EXCLUDED.customer_id,
-            customer_name = EXCLUDED.customer_name,
-            items = EXCLUDED.items,
-            subtotal = EXCLUDED.subtotal,
-            discount = EXCLUDED.discount,
-            grand_total = EXCLUDED.grand_total,
-            paid_amount = EXCLUDED.paid_amount,
-            due_amount = EXCLUDED.due_amount,
-            payment_method = EXCLUDED.payment_method,
-            status = EXCLUDED.status;
-        `);
-      });
-    }
-
-    // Sync Accounting
-    if (Array.isArray(body.accounting)) {
-      body.accounting.forEach(a => {
-        tasks.push(sql`
-          INSERT INTO accounting (id, entry_date, entry_type, category, amount, note)
-          VALUES (${a.id}, ${a.date}, ${a.type}, ${a.category}, ${a.amount}, ${a.note || null})
-          ON CONFLICT (id) DO UPDATE SET
-            entry_type = EXCLUDED.entry_type,
             category = EXCLUDED.category,
-            amount = EXCLUDED.amount,
-            note = EXCLUDED.note;
-        `);
-      });
-    }
-
-    // Sync Batch Sales
-    if (Array.isArray(body.batchSales)) {
-      body.batchSales.forEach(bs => {
-        tasks.push(sql`
-          INSERT INTO batch_sales (id, flock_id, sale_date, buyer_name, bird_qty, total_weight, price_per_kg, total_amount)
-          VALUES (${bs.id}, ${bs.flockId}, ${bs.date}, ${bs.buyerName}, ${bs.birdQty}, ${bs.totalWeight}, ${bs.pricePerKg}, ${bs.totalAmount})
-          ON CONFLICT (id) DO UPDATE SET
-            buyer_name = EXCLUDED.buyer_name,
-            bird_qty = EXCLUDED.bird_qty,
-            total_weight = EXCLUDED.total_weight,
-            price_per_kg = EXCLUDED.price_per_kg,
-            total_amount = EXCLUDED.total_amount;
-        `);
-      });
-    }
-
-    // Sync Batch Expenses
-    if (Array.isArray(body.batchExpenses)) {
-      body.batchExpenses.forEach(be => {
-        tasks.push(sql`
-          INSERT INTO batch_expenses (id, flock_id, exp_date, category, amount, note)
-          VALUES (${be.id}, ${be.flockId}, ${be.date}, ${be.category}, ${be.amount}, ${be.note || null})
-          ON CONFLICT (id) DO UPDATE SET
-            category = EXCLUDED.category,
-            amount = EXCLUDED.amount,
-            note = EXCLUDED.note;
-        `);
-      });
-    }
-
-    // Sync POS Authorized Emails
-    if (Array.isArray(body.posAuthorizedEmails)) {
-      body.posAuthorizedEmails.forEach(pe => {
-        tasks.push(sql`
-          INSERT INTO pos_authorized_emails (id, email, name, role, status, added_date)
-          VALUES (${pe.id}, ${pe.email}, ${pe.name}, ${pe.role}, ${pe.status}, ${pe.addedDate})
-          ON CONFLICT (id) DO UPDATE SET
-            email = EXCLUDED.email,
-            name = EXCLUDED.name,
-            role = EXCLUDED.role,
-            status = EXCLUDED.status;
+            price = EXCLUDED.price,
+            cost = EXCLUDED.cost,
+            stock = EXCLUDED.stock,
+            unit = EXCLUDED.unit,
+            min_stock = EXCLUDED.min_stock;
         `);
       });
     }

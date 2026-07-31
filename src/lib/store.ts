@@ -360,6 +360,7 @@ class FarmStore {
       this.state[key] = (list as unknown as { id: string }[]).filter(x => x.id !== id) as unknown as FarmState[K];
       this.syncCurrentUserRole();
       this.saveState();
+      this.pushToCloudDb();
     }
   }
 
