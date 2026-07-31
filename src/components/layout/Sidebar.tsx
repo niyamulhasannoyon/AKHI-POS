@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
-  ShoppingCart, 
   Bird, 
   Package, 
   Users, 
@@ -18,7 +17,6 @@ import {
 
 const navItems = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { label: 'Point of Sale (F2)', href: '/pos', icon: ShoppingCart, highlight: true },
   { label: 'Khamar Management', href: '/khamar', icon: Bird, highlight: true },
   { label: 'Products & Stock', href: '/inventory', icon: Package },
   { label: 'Customer Ledgers', href: '/customers', icon: Users },

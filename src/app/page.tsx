@@ -137,11 +137,7 @@ export default function DashboardPage() {
           <span>🚀</span> Quick Action Launchpad
         </h3>
         <div className="flex flex-wrap gap-3">
-          <Link href="/pos" className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-950/50 flex items-center gap-2">
-            <ShoppingBag className="w-4 h-4" />
-            <span>Open POS Register (F2)</span>
-          </Link>
-          <Link href="/khamar" className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-amber-950/50 flex items-center gap-2">
+          <Link href="/khamar" className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-950/50 flex items-center gap-2">
             <PlusCircle className="w-4 h-4" />
             <span>Log Daily Khamari Entry</span>
           </Link>
@@ -157,9 +153,6 @@ export default function DashboardPage() {
         <div className="glass-card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-white text-base">Recent Sales Transactions</h3>
-            <Link href="/pos" className="text-xs text-emerald-400 hover:underline flex items-center gap-1 font-semibold">
-              <span>View All</span> <ArrowRight className="w-3 h-3" />
-            </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="custom-table">
