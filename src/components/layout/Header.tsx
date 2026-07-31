@@ -172,25 +172,7 @@ export default function Header({ onToggleMobileSidebar, onOpenAuthModal }: Heade
           <span className="hidden sm:inline">Import</span>
         </button>
 
-        <button 
-          onClick={handleResetAllData} 
-          className="flex items-center gap-1.5 px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 rounded-lg font-bold transition text-[11px] sm:text-xs"
-          title="সমস্ত ডেটা মুছে রিসেট করুন (পূর্বের ডেটা স্বয়ংক্রিয় ব্যাকআপ হিসেবে সেভ থাকবে)"
-        >
-          <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
-          <span>রিসেট</span>
-        </button>
 
-        {hasSnapshot && (
-          <button 
-            onClick={handleRestoreSnapshot} 
-            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 rounded-lg font-extrabold transition text-[11px] sm:text-xs shadow-lg shadow-amber-950/40 animate-pulse"
-            title="রিসেট করার আগের সমস্ত ডেটা ব্যাকআপ থেকে পুনরুদ্ধার করুন"
-          >
-            <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-            <span>↩️ রিসেট আনডু</span>
-          </button>
-        )}
 
         {/* Google Logged-In User Profile or Login Button */}
         {currentUser ? (
