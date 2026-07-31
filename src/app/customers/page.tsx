@@ -18,12 +18,21 @@ export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
-  // Modals
+  // Modals & Notifications
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [activeCustomer, setActiveCustomer] = useState<Customer | null>(null);
+
+  // Toast & Delete Modal
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteCustId, setDeleteCustId] = useState<Customer | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   // Form State: Edit Customer
   const [editName, setEditName] = useState('');
@@ -59,7 +68,10 @@ export default function CustomersPage() {
 
   const handleAddCustomer = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!custName.trim()) return alert('অনুগ্রহ করে গ্রাহকের নাম লিখুন');
+    if (!custName.trim()) {
+      showToast('অনুগ্রহ করে গ্রাহকের নাম লিখুন', 'error');
+      return;
+    }
 
     const dueAmount = custInitialDue ? Number(custInitialDue) : 0;
     const newCustomer: Customer = {
@@ -90,6 +102,7 @@ export default function CustomersPage() {
     setCustAddress('');
     setCustInitialDue('');
     setShowAddModal(false);
+    showToast(`নতুন গ্রাহক "${newCustomer.name}" সফলভাবে যুক্ত করা হয়েছে!`);
   };
 
   const openEditCustomerModal = (c: Customer) => {
@@ -105,7 +118,10 @@ export default function CustomersPage() {
   const handleUpdateCustomer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeCustomer) return;
-    if (!editName.trim()) return alert('অনুগ্রহ করে কাস্টমারের নাম দিন');
+    if (!editName.trim()) {
+      showToast('অনুগ্রহ করে কাস্টমারের নাম দিন', 'error');
+      return;
+    }
 
     farmStore.updateItem('customers', activeCustomer.id, {
       name: editName.trim(),
@@ -116,19 +132,24 @@ export default function CustomersPage() {
     });
 
     setShowEditModal(false);
-    alert('কাস্টমারের তথ্য সফলভাবে আপডেট করা হয়েছে!');
+    showToast('কাস্টমারের তথ্য সফলভাবে আপডেট করা হয়েছে!');
   };
 
-  const handleDeleteCustomer = (id: string) => {
-    if (confirm('আপনি কি নিশ্চিত যে এই কাস্টমারকে মুছে ফেলতে চান?')) {
-      farmStore.deleteItem('customers', id);
+  const confirmDeleteCustomer = () => {
+    if (deleteCustId) {
+      farmStore.deleteItem('customers', deleteCustId.id);
+      showToast(`কাস্টমার "${deleteCustId.name}" কে মুছে ফেলা হয়েছে!`);
+      setDeleteCustId(null);
     }
   };
 
   const handleReceivePayment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeCustomer) return;
-    if (!payAmount || Number(payAmount) <= 0) return alert('অনুগ্রহ করে টাকার পরিমাণ লিখুন');
+    if (!payAmount || Number(payAmount) <= 0) {
+      showToast('অনুগ্রহ করে টাকার পরিমাণ লিখুন', 'error');
+      return;
+    }
 
     const amt = Number(payAmount);
     const newDue = Math.max(0, activeCustomer.due - amt);
@@ -162,7 +183,7 @@ export default function CustomersPage() {
     setPayAmount('');
     setPayNote('');
     setShowPaymentModal(false);
-    alert(`সাফল্যের সাথে ৳${amt.toLocaleString()} টাকার বাকি আদায় সম্পন্ন হয়েছে!`);
+    showToast(`সাফল্যের সাথে ৳${amt.toLocaleString()} টাকার বাকি আদায় সম্পন্ন হয়েছে!`);
   };
 
   // Filtered Customers
