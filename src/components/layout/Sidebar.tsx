@@ -33,8 +33,8 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-[#0b111c]/95 backdrop-blur-xl border-r border-white/10 flex flex-col fixed inset-y-0 left-0 z-40">
-      <div className="h-16 px-5 border-b border-white/10 flex items-center gap-3">
-        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center font-black text-white text-xl shadow-lg shadow-emerald-900/30">
+      <Link href="/" className="h-16 px-5 border-b border-white/10 flex items-center gap-3 hover:opacity-90 transition cursor-pointer group">
+        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center font-black text-white text-xl shadow-lg shadow-emerald-900/30 group-hover:scale-105 transition-transform">
           🐔
         </div>
         <div>
@@ -43,7 +43,7 @@ export default function Sidebar() {
           </h1>
           <p className="text-[10px] tracking-widest text-gray-400 uppercase">NEXTJS PRO 4.0</p>
         </div>
-      </div>
+      </Link>
 
       <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {

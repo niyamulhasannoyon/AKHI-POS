@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { farmStore } from '@/lib/store';
 import { Download, Upload, Clock as ClockIcon, RotateCcw } from 'lucide-react';
 
@@ -88,9 +89,9 @@ export default function Header() {
 
   return (
     <header className="h-16 bg-[#090d16]/80 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between sticky top-0 z-30 ml-64">
-      <div className="flex items-center gap-3">
+      <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition cursor-pointer">
         <h2 className="text-lg font-bold text-white tracking-tight">Akhi Farm Management System</h2>
-      </div>
+      </Link>
 
       <div className="flex items-center gap-3 text-xs">
         <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-gray-300">
