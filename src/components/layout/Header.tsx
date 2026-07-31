@@ -3,24 +3,28 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { farmStore } from '@/lib/store';
-import { Download, Upload, Clock as ClockIcon, RotateCcw, Menu } from 'lucide-react';
+import { AuthUser } from '@/lib/types';
+import { Download, Upload, Clock as ClockIcon, RotateCcw, Menu, LogOut, User, LogIn } from 'lucide-react';
 
 interface HeaderProps {
   onToggleMobileSidebar: () => void;
+  onOpenAuthModal?: () => void;
 }
 
-export default function Header({ onToggleMobileSidebar }: HeaderProps) {
+export default function Header({ onToggleMobileSidebar, onOpenAuthModal }: HeaderProps) {
   const [timeStr, setTimeStr] = useState<string>('');
   const [activeFlocksCount, setActiveFlocksCount] = useState<number>(0);
   const [lowStockCount, setLowStockCount] = useState<number>(0);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     const updateStats = () => {
       const state = farmStore.getState();
-      const activeFlocks = state.flocks.filter(f => f.status === 'Active').length;
-      const lowStock = state.products.filter(p => p.stock <= p.minStock).length;
+      const activeFlocks = (state.flocks || []).filter(f => f.status === 'Active').length;
+      const lowStock = (state.products || []).filter(p => p.stock <= p.minStock).length;
       setActiveFlocksCount(activeFlocks);
       setLowStockCount(lowStock);
+      setCurrentUser(state.currentUser || null);
     };
 
     updateStats();
@@ -160,6 +164,38 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
           <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
           <span>রিসেট</span>
         </button>
+
+        {/* Google Logged-In User Profile or Login Button */}
+        {currentUser ? (
+          <div className="flex items-center gap-2 pl-2 border-l border-white/10">
+            <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
+              {currentUser.picture ? (
+                <img src={currentUser.picture} alt={currentUser.name} className="w-5 h-5 rounded-full object-cover border border-emerald-400/50" />
+              ) : (
+                <User className="w-4 h-4 text-emerald-400" />
+              )}
+              <span className="font-bold text-white max-w-[85px] sm:max-w-[120px] truncate text-[11px] sm:text-xs">{currentUser.name}</span>
+              <span className="hidden xs:inline-block px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 font-extrabold uppercase">
+                {currentUser.role || 'Admin'}
+              </span>
+            </div>
+            <button
+              onClick={() => farmStore.logout()}
+              className="p-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg transition"
+              title="লগআউট করুন"
+            >
+              <LogOut className="w-3.5 h-3.5 text-rose-400" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onOpenAuthModal}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-lg transition text-xs shadow-md"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span>Google সাইন ইন</span>
+          </button>
+        )}
       </div>
     </header>
   );

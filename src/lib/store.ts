@@ -237,6 +237,16 @@ class FarmStore {
     this.listeners.forEach(l => l(this.state));
   }
 
+  public setCurrentUser(user: any) {
+    this.state = { ...this.state, currentUser: user };
+    this.saveState();
+  }
+
+  public logout() {
+    this.state = { ...this.state, currentUser: null };
+    this.saveState();
+  }
+
   // Mutations
   public addItem<K extends keyof FarmState>(key: K, item: FarmState[K] extends (infer T)[] ? T : FarmState[K]) {
     const list = this.state[key];

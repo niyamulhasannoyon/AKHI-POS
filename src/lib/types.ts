@@ -176,6 +176,14 @@ export interface BatchExpense {
   note?: string;
 }
 
+export interface AuthUser {
+  email: string;
+  name: string;
+  picture?: string;
+  role?: string;
+  idToken?: string;
+}
+
 export interface PosAuthorizedEmail {
   id: string;
   email: string;
@@ -203,4 +211,5 @@ export interface FarmState {
   khamars: KhamarProfile[];
   customerPayments: CustomerPayment[];
   posAuthorizedEmails: PosAuthorizedEmail[];
+  currentUser?: AuthUser | null;
 }
