@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { farmStore } from '@/lib/store';
+import { farmStore, getActiveUserRole } from '@/lib/store';
 import { 
   LayoutDashboard, 
   ShoppingBag,
@@ -41,16 +41,17 @@ interface SidebarProps {
 
 export default function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps) {
   const pathname = usePathname();
-  const [userRole, setUserRole] = useState<string>('Admin');
-  const [userName, setUserName] = useState<string>('অ্যাডমিন');
+  const [userRole, setUserRole] = useState<string>('Guest');
+  const [userName, setUserName] = useState<string>('ইউজার');
   const [userPicture, setUserPicture] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const update = () => {
-      const user = farmStore.getState().currentUser;
-      setUserRole(user?.role || 'Admin');
-      setUserName(user?.name || 'অ্যাডমিন');
-      setUserPicture(user?.picture);
+      const state = farmStore.getState();
+      const role = getActiveUserRole(state);
+      setUserRole(role);
+      setUserName(state.currentUser?.name || 'ইউজার');
+      setUserPicture(state.currentUser?.picture);
     };
     update();
     const unsub = farmStore.subscribe(update);

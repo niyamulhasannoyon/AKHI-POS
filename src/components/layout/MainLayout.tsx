@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import GoogleAuthModal from '../auth/GoogleAuthModal';
-import { farmStore } from '@/lib/store';
+import { farmStore, getActiveUserRole } from '@/lib/store';
 import { AuthUser } from '@/lib/types';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -17,7 +17,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     setIsMounted(true);
     const update = () => {
       const st = farmStore.getState();
-      setCurrentUser(st.currentUser || null);
+      const role = getActiveUserRole(st);
+      if (role === 'Guest') {
+        setCurrentUser(null);
+      } else {
+        setCurrentUser(st.currentUser || null);
+      }
     };
 
     update();

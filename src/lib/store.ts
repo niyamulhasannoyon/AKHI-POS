@@ -257,6 +257,7 @@ class FarmStore {
     const list = this.state[key];
     if (Array.isArray(list)) {
       (list as unknown as unknown[]).unshift(item);
+      this.syncCurrentUserRole();
       this.saveState();
     }
   }
@@ -274,6 +275,7 @@ class FarmStore {
           ...(list as unknown as Record<string, unknown>[])[idx],
           ...updatedFields
         };
+        this.syncCurrentUserRole();
         this.saveState();
       }
     }
@@ -283,7 +285,19 @@ class FarmStore {
     const list = this.state[key];
     if (Array.isArray(list)) {
       this.state[key] = (list as unknown as { id: string }[]).filter(x => x.id !== id) as unknown as FarmState[K];
+      this.syncCurrentUserRole();
       this.saveState();
+    }
+  }
+
+  private syncCurrentUserRole() {
+    if (this.state.currentUser && this.state.currentUser.email) {
+      const currentRole = getActiveUserRole(this.state);
+      if (currentRole === 'Guest') {
+        this.state.currentUser = null;
+      } else {
+        this.state.currentUser = { ...this.state.currentUser, role: currentRole };
+      }
     }
   }
 
@@ -366,3 +380,17 @@ class FarmStore {
 }
 
 export const farmStore = new FarmStore();
+
+export function getActiveUserRole(state: FarmState): string {
+  const user = state.currentUser;
+  if (!user || !user.email) return 'Guest';
+
+  const list = state.posAuthorizedEmails || [];
+  const match = list.find(e => e.email.toLowerCase() === user.email.toLowerCase() && e.status === 'Active');
+
+  if (match) {
+    return match.role;
+  }
+
+  return 'Guest';
+}
