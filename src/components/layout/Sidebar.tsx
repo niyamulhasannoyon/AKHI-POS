@@ -22,7 +22,6 @@ import {
 
 const navItems = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['Admin', 'Manager', 'Cashier', 'Sales Operator'] },
-  { label: 'POS Cash Register', href: '/pos', icon: ShoppingBag, highlight: true, roles: ['Admin', 'Manager', 'Cashier', 'Sales Operator'] },
   { label: 'Customer Ledgers', href: '/customers', icon: Users, roles: ['Admin', 'Manager', 'Cashier', 'Sales Operator'] },
   { label: 'Products & Stock', href: '/inventory', icon: Package, roles: ['Admin', 'Manager'] },
   { label: 'Khamar Management', href: '/khamar', icon: Bird, roles: ['Admin', 'Manager'] },
@@ -109,8 +108,6 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps)
             
             if (isActive) {
               classNames += "bg-gradient-to-r from-emerald-500/20 to-emerald-500/5 text-white border border-emerald-500/40 shadow-md shadow-emerald-950/50";
-            } else if (item.highlight) {
-              classNames += "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 hover:text-white";
             } else {
               classNames += "text-gray-400 hover:text-white hover:bg-white/5";
             }
