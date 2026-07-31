@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { farmStore } from '@/lib/store';
 import { 
   LayoutDashboard, 
+  ShoppingBag,
   Bird, 
   Package, 
   Users, 
@@ -13,20 +16,22 @@ import {
   Clock, 
   BarChart3, 
   UserCheck,
-  X
+  X,
+  ShieldCheck
 } from 'lucide-react';
 
 const navItems = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { label: 'Khamar Management', href: '/khamar', icon: Bird, highlight: true },
-  { label: 'Products & Stock', href: '/inventory', icon: Package },
-  { label: 'Customer Ledgers', href: '/customers', icon: Users },
-  { label: 'Supplier Ledgers', href: '/suppliers', icon: Building2 },
-  { label: 'Farm Accounting', href: '/accounting', icon: Receipt },
-  { label: 'Loans & EMI', href: '/loans', icon: Landmark },
-  { label: 'Installments', href: '/installments', icon: Clock },
-  { label: 'Business Analytics', href: '/analytics', icon: BarChart3 },
-  { label: 'HR & Payroll', href: '/hr', icon: UserCheck },
+  { label: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['Admin', 'Manager', 'Cashier', 'Sales Operator'] },
+  { label: 'POS Cash Register', href: '/pos', icon: ShoppingBag, highlight: true, roles: ['Admin', 'Manager', 'Cashier', 'Sales Operator'] },
+  { label: 'Customer Ledgers', href: '/customers', icon: Users, roles: ['Admin', 'Manager', 'Cashier', 'Sales Operator'] },
+  { label: 'Products & Stock', href: '/inventory', icon: Package, roles: ['Admin', 'Manager'] },
+  { label: 'Khamar Management', href: '/khamar', icon: Bird, roles: ['Admin', 'Manager'] },
+  { label: 'Supplier Ledgers', href: '/suppliers', icon: Building2, roles: ['Admin', 'Manager'] },
+  { label: 'Installments', href: '/installments', icon: Clock, roles: ['Admin', 'Manager'] },
+  { label: 'Farm Accounting', href: '/accounting', icon: Receipt, roles: ['Admin'] },
+  { label: 'Loans & EMI', href: '/loans', icon: Landmark, roles: ['Admin'] },
+  { label: 'Business Analytics', href: '/analytics', icon: BarChart3, roles: ['Admin'] },
+  { label: 'HR & Payroll', href: '/hr', icon: UserCheck, roles: ['Admin'] },
 ];
 
 interface SidebarProps {
@@ -36,6 +41,21 @@ interface SidebarProps {
 
 export default function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps) {
   const pathname = usePathname();
+  const [userRole, setUserRole] = useState<string>('Admin');
+  const [userName, setUserName] = useState<string>('অ্যাডমিন');
+
+  useEffect(() => {
+    const update = () => {
+      const user = farmStore.getState().currentUser;
+      setUserRole(user?.role || 'Admin');
+      setUserName(user?.name || 'অ্যাডমিন');
+    };
+    update();
+    const unsub = farmStore.subscribe(update);
+    return () => unsub();
+  }, []);
+
+  const visibleNavItems = navItems.filter(item => item.roles.includes(userRole));
 
   return (
     <>
@@ -63,7 +83,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps)
               <h1 className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-amber-400 text-lg leading-tight">
                 AKHI POS
               </h1>
-              <p className="text-[10px] tracking-widest text-gray-400 uppercase">NEXTJS PRO 4.0</p>
+              <p className="text-[10px] tracking-widest text-emerald-400 font-bold uppercase">{userRole} PANEL</p>
             </div>
           </Link>
 
@@ -78,7 +98,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps)
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || (item.href === '/khamar' && pathname === '/khamari');
 
@@ -107,6 +127,17 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps)
             );
           })}
         </nav>
+
+        {/* User Role Footer Badge */}
+        <div className="p-3 border-t border-white/10 bg-slate-900/50 text-xs">
+          <div className="flex items-center gap-2 text-gray-300">
+            <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            <div className="truncate">
+              <div className="font-bold text-white truncate">{userName}</div>
+              <div className="text-[10px] text-emerald-400 font-semibold uppercase">{userRole} এক্সেস মোড</div>
+            </div>
+          </div>
+        </div>
       </aside>
     </>
   );
