@@ -132,9 +132,9 @@ export default function POSPage() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-6rem)]">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[calc(100vh-6rem)] lg:h-[calc(100vh-6rem)]">
       {/* Left 2 Columns: Catalog */}
-      <div className="lg:col-span-2 glass-card flex flex-col h-full overflow-hidden">
+      <div className="lg:col-span-2 glass-card flex flex-col min-h-[450px] lg:h-full overflow-hidden">
         {/* Search & Category Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="relative flex-1">

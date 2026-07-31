@@ -87,7 +87,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Top Executive KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <div className="glass-card flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-bold">
             <DollarSign className="w-6 h-6" />
@@ -303,8 +303,8 @@ export default function DashboardPage() {
 
       {/* ADD AUTHORIZED EMAIL MODAL */}
       {showAddEmailModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-lg w-full">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6 max-w-lg w-full my-auto max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-gray-800 pb-4">
               <h3 className="text-xl font-bold text-emerald-400 flex items-center gap-2">
                 <Lock className="w-5 h-5" />
