@@ -87,42 +87,40 @@ export default function GoogleAuthModal({ isOpen, onClose }: GoogleAuthModalProp
       if (payload && payload.email) {
         const state = farmStore.getState();
         const authorizedList = state.posAuthorizedEmails || [];
+        const userEmail = payload.email.toLowerCase();
+
+        // Strictly check if email exists in POS Authorized Emails list and is Active
         const authMatch = authorizedList.find(
-          (a) => a.email.toLowerCase() === payload.email.toLowerCase() && a.status === 'Active'
+          (a) => a.email.toLowerCase() === userEmail && a.status === 'Active'
         );
 
-        const role = authMatch ? authMatch.role : 'Admin';
+        if (authMatch) {
+          // Fetch crisp high-resolution Gmail profile picture from Google payload
+          let profilePic = payload.picture ? payload.picture.replace(/=s\d+-c/, '=s256-c') : '';
+          if (!profilePic) {
+            profilePic = `https://ui-avatars.com/api/?name=${encodeURIComponent(authMatch.name || payload.name || payload.email)}&background=10b981&color=fff`;
+          }
 
-        // Fetch crisp high-resolution Gmail profile picture from Google payload
-        let profilePic = payload.picture ? payload.picture.replace(/=s\d+-c/, '=s256-c') : '';
-        if (!profilePic) {
-          profilePic = `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.name || payload.email)}&background=10b981&color=fff`;
+          const user: AuthUser = {
+            email: payload.email,
+            name: authMatch.name || payload.name || payload.email.split('@')[0],
+            picture: profilePic,
+            role: authMatch.role, // Strictly use the assigned role from POS Authorized Emails
+            idToken: response.credential,
+          };
+
+          farmStore.setCurrentUser(user);
+          setIsLoading(false);
+          if (onClose) onClose();
+        } else {
+          const inactiveMatch = authorizedList.find((a) => a.email.toLowerCase() === userEmail);
+          if (inactiveMatch && inactiveMatch.status === 'Inactive') {
+            setErrorMsg(`❌ (${payload.email}) ইমেইলটি সাময়িকভাবে ডি-অ্যাক্টিভেট করা আছে। অ্যাডমিনের সাথে যোগাযোগ করুন।`);
+          } else {
+            setErrorMsg(`❌ (${payload.email}) ইমেইলটি POS পারমিশন তালিকায় অনুমোদিত নয়। অ্যাডমিন কর্তৃক "POS Authorized Emails" তালিকায় আপনার ইমেইল যোগ করা প্রয়োজন।`);
+          }
+          setIsLoading(false);
         }
-
-        const user: AuthUser = {
-          email: payload.email,
-          name: payload.name || payload.email.split('@')[0],
-          picture: profilePic,
-          role: role,
-          idToken: response.credential,
-        };
-
-        farmStore.setCurrentUser(user);
-
-        // Auto add to authorized emails if not present
-        if (!authMatch) {
-          farmStore.addItem('posAuthorizedEmails', {
-            id: `POS-ACC-${Date.now().toString().slice(-4)}`,
-            email: payload.email.toLowerCase(),
-            name: payload.name || 'Google User',
-            role: 'Admin',
-            status: 'Active',
-            addedDate: new Date().toISOString().slice(0, 10),
-          });
-        }
-
-        setIsLoading(false);
-        if (onClose) onClose();
       } else {
         setErrorMsg('গুগল অ্যাকাউন্ট থেকে ভ্যালিড তথ্য পাওয়া যায়নি');
         setIsLoading(false);

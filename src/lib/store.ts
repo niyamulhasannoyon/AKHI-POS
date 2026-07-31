@@ -33,7 +33,9 @@ export const EMPTY_STATE: FarmState = {
   posAuthorizedEmails: [
     { id: 'POS-ACC-1', email: 'admin@akhipos.com', name: 'অ্যাডমিন অ্যাকাউন্ট', role: 'Admin', status: 'Active', addedDate: '2026-07-01' },
     { id: 'POS-ACC-2', email: 'noyon@akhipos.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
-    { id: 'POS-ACC-3', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
+    { id: 'POS-ACC-3', email: 'niyamulhasannoyon@gmail.com', name: 'নিয়ামুল হাসান (মালিক জিমেইল)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-4', email: 'niyamulhasan@gmail.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-5', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
   ]
 };
 
@@ -134,7 +136,9 @@ export const DEFAULT_SEED: FarmState = {
   posAuthorizedEmails: [
     { id: 'POS-ACC-1', email: 'admin@akhipos.com', name: 'অ্যাডমিন অ্যাকাউন্ট', role: 'Admin', status: 'Active', addedDate: '2026-07-01' },
     { id: 'POS-ACC-2', email: 'noyon@akhipos.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
-    { id: 'POS-ACC-3', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
+    { id: 'POS-ACC-3', email: 'niyamulhasannoyon@gmail.com', name: 'নিয়ামুল হাসান (মালিক জিমেইল)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-4', email: 'niyamulhasan@gmail.com', name: 'নিয়ামুল হাসান (মালিক)', role: 'Admin', status: 'Active', addedDate: '2026-07-15' },
+    { id: 'POS-ACC-5', email: 'cashier@akhipos.com', name: 'ক্যাশিয়ার ডেস্ক-১', role: 'Cashier', status: 'Active', addedDate: '2026-07-20' }
   ]
 };
 
