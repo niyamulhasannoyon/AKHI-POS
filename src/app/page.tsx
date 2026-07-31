@@ -145,9 +145,6 @@ export default function DashboardPage() {
             <PlusCircle className="w-4 h-4" />
             <span>Log Daily Khamari Entry</span>
           </Link>
-          <Link href="/feed-gura" className="px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white font-medium text-sm rounded-xl border border-white/10 flex items-center gap-2">
-            <span>🌾 Formulate Feed</span>
-          </Link>
           <Link href="/customers" className="px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white font-medium text-sm rounded-xl border border-white/10 flex items-center gap-2">
             <span>💳 Receive Customer Due</span>
           </Link>
