@@ -147,6 +147,7 @@ class FarmStore {
     this.state = DEFAULT_SEED;
     if (typeof window !== 'undefined') {
       this.state = this.loadFromLocalStorage();
+      this.syncWithCloudDb();
     }
   }
 
@@ -162,6 +163,53 @@ class FarmStore {
     return DEFAULT_SEED;
   }
 
+  public async syncWithCloudDb(): Promise<boolean> {
+    if (typeof window === 'undefined') return false;
+    try {
+      const res = await fetch('/api/sync', { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          const dbData = json.data;
+          this.state = {
+            ...this.state,
+            ...dbData,
+            settings: { ...this.state.settings, ...(dbData.settings || {}) },
+            flocks: dbData.flocks && dbData.flocks.length > 0 ? dbData.flocks : this.state.flocks,
+            products: dbData.products && dbData.products.length > 0 ? dbData.products : this.state.products,
+            customers: dbData.customers && dbData.customers.length > 0 ? dbData.customers : this.state.customers,
+            suppliers: dbData.suppliers && dbData.suppliers.length > 0 ? dbData.suppliers : this.state.suppliers,
+            batchSales: dbData.batchSales && dbData.batchSales.length > 0 ? dbData.batchSales : this.state.batchSales,
+            batchExpenses: dbData.batchExpenses && dbData.batchExpenses.length > 0 ? dbData.batchExpenses : this.state.batchExpenses,
+            posAuthorizedEmails: dbData.posAuthorizedEmails && dbData.posAuthorizedEmails.length > 0 ? dbData.posAuthorizedEmails : this.state.posAuthorizedEmails,
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+          this.notify();
+
+          // Also push back local additions to DB
+          this.pushToCloudDb();
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('Neon DB Sync unavailable, using local storage:', e);
+    }
+    return false;
+  }
+
+  public async pushToCloudDb() {
+    if (typeof window === 'undefined') return;
+    try {
+      await fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.state)
+      });
+    } catch (e) {
+      console.warn('Failed to push state to Neon DB:', e);
+    }
+  }
+
   public getState(): FarmState {
     return this.state;
   }
@@ -171,6 +219,7 @@ class FarmStore {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
         this.notify();
+        this.pushToCloudDb();
       } catch (e) {
         console.error('Error saving state to localStorage:', e);
       }

@@ -65,6 +65,19 @@ export default function Header() {
     input.click();
   };
 
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncDatabase = async () => {
+    setIsSyncing(true);
+    const success = await farmStore.syncWithCloudDb();
+    setIsSyncing(false);
+    if (success) {
+      alert('Neon PostgreSQL ক্লাউড ডাটাবেজের সাথে সফলভাবে সব ডেটা সিঙ্ক হয়েছে!');
+    } else {
+      alert('ক্লাউড ডাটাবেজ সিঙ্ক ব্যর্থ হয়েছে অথবা DATABASE_URL ভ্যারিয়েবল সেট করা নেই।');
+    }
+  };
+
   const handleResetAllData = () => {
     if (confirm('আপনি কি নিশ্চিত যে সমস্ত ডেমো ডেটা মুছে ফেলে রিয়েল কাজের জন্য সিস্টেম রিসেট করতে চান? (এই অ্যাকশনটি ব্যাকআপ না নিয়ে ফিরিয়ে আনা যাবে না)')) {
       farmStore.clearAllData();
@@ -79,7 +92,7 @@ export default function Header() {
         <h2 className="text-lg font-bold text-white tracking-tight">Akhi Farm Management System</h2>
       </div>
 
-      <div className="flex items-center gap-4 text-xs">
+      <div className="flex items-center gap-3 text-xs">
         <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-gray-300">
           <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
           <span>{activeFlocksCount} Active Flocks</span>
@@ -93,6 +106,16 @@ export default function Header() {
           <ClockIcon className="w-4 h-4 text-emerald-400" />
           <span>{timeStr || '00:00:00 AM'}</span>
         </div>
+
+        <button
+          onClick={handleSyncDatabase}
+          disabled={isSyncing}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 rounded-lg font-bold transition disabled:opacity-50"
+          title="localhost এবং live domain-এর মধ্যে ডেটাবেজ সিঙ্ক করুন"
+        >
+          <RotateCcw className={`w-3.5 h-3.5 text-emerald-400 ${isSyncing ? 'animate-spin' : ''}`} />
+          <span>{isSyncing ? 'সিঙ্ক হচ্ছে...' : '⚡ ডাটাবেজ সিঙ্ক'}</span>
+        </button>
 
         <button 
           onClick={handleExportBackup} 
