@@ -101,7 +101,8 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition cursor-pointer">
+        <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition cursor-pointer">
+          <img src="/logo.png" alt="AKHI POS" className="w-8 h-8 rounded-lg border border-emerald-500/40 object-cover bg-[#090d16]" />
           <h2 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight truncate max-w-[170px] xs:max-w-[240px] sm:max-w-none">
             Akhi Farm Management
           </h2>
