@@ -72,6 +72,9 @@ export default function KhamarPage() {
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().slice(0, 10));
   const [expenseCategory, setExpenseCategory] = useState('');
   const [expenseAmount, setExpenseAmount] = useState<number | ''>('');
+  const [feedBagQty, setFeedBagQty] = useState<number | ''>('');
+  const [feedPricePerBag, setFeedPricePerBag] = useState<number | ''>('');
+  const [feedType, setFeedType] = useState('');
 
   // Form State 4: Mortality
   const [mortalityCount, setMortalityCount] = useState<number | ''>('');
@@ -269,22 +272,47 @@ export default function KhamarPage() {
     setExpenseDate(new Date().toISOString().slice(0, 10));
     setExpenseCategory('');
     setExpenseAmount('');
+    setFeedBagQty('');
+    setFeedPricePerBag('');
+    setFeedType('');
   };
 
   const handleCreateExpense = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFlock) return;
     if (!expenseCategory) return alert('অনুগ্রহ করে খরচের ধরন বাছাই করুন');
-    if (!expenseAmount || Number(expenseAmount) <= 0) return alert('অনুগ্রহ করে খরচের পরিমাণ দিন');
 
-    const amount = Number(expenseAmount);
+    let finalAmount = 0;
+    let expNote = `Batch: ${selectedFlock.name}`;
+
+    if (expenseCategory === 'খাদ্য বাবদ খরচ' || expenseCategory === 'গুঁড়া বাবদ খরচ') {
+      const qty = Number(feedBagQty) || 0;
+      const price = Number(feedPricePerBag) || 0;
+      if (qty <= 0) return alert('অনুগ্রহ করে বস্তার সংখ্যা দিন');
+      if (price <= 0) return alert('অনুগ্রহ করে বস্তা প্রতি দাম দিন');
+      finalAmount = qty * price;
+
+      if (expenseCategory === 'খাদ্য বাবদ খরচ') {
+        const typeStr = feedType ? ` (${feedType})` : '';
+        expNote = `খাদ্য${typeStr}: ${qty} বস্তা @ ৳${price}/বস্তা - Batch: ${selectedFlock.name}`;
+      } else {
+        expNote = `গুঁড়া: ${qty} বস্তা @ ৳${price}/বস্তা - Batch: ${selectedFlock.name}`;
+      }
+    } else {
+      if (!expenseAmount || Number(expenseAmount) <= 0) return alert('অনুগ্রহ করে খরচের পরিমাণ দিন');
+      finalAmount = Number(expenseAmount);
+    }
 
     const newExp: BatchExpense = {
       id: `EXP-${Date.now().toString().slice(-4)}`,
       flockId: selectedFlock.id,
       date: expenseDate,
       category: expenseCategory,
-      amount
+      amount: finalAmount,
+      bagQty: (expenseCategory === 'খাদ্য বাবদ খরচ' || expenseCategory === 'গুঁড়া বাবদ খরচ') ? Number(feedBagQty) || undefined : undefined,
+      pricePerBag: (expenseCategory === 'খাদ্য বাবদ খরচ' || expenseCategory === 'গুঁড়া বাবদ খরচ') ? Number(feedPricePerBag) || undefined : undefined,
+      feedType: (expenseCategory === 'খাদ্য বাবদ খরচ' && feedType) ? feedType : undefined,
+      note: expNote
     };
 
     farmStore.addItem('batchExpenses', newExp);
@@ -294,11 +322,11 @@ export default function KhamarPage() {
       date: expenseDate,
       type: 'Expense',
       category: expenseCategory,
-      amount,
-      note: `Batch: ${selectedFlock.name}`
+      amount: finalAmount,
+      note: expNote
     });
 
-    alert(`সাফল্যের সাথে ৳${amount.toLocaleString()} টাকার খরচ যুক্ত করা হয়েছে!`);
+    alert(`সাফল্যের সাথে ৳${finalAmount.toLocaleString()} টাকার ${expenseCategory} যুক্ত করা হয়েছে!`);
     handleResetExpense();
     setActiveModal(null);
   };
@@ -979,22 +1007,22 @@ export default function KhamarPage() {
         </div>
       )}
 
-      {/* 3. BATCH EXPENSE MODAL (Matches Screenshot 2) */}
+      {/* 3. BATCH EXPENSE MODAL (Matches Screenshot 2 & User Request) */}
       {activeModal === 'EXPENSE' && selectedFlock && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-[#121620] border border-rose-500/30 rounded-2xl p-6 shadow-2xl space-y-6 max-w-2xl w-full">
-            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="bg-[#121620] border border-rose-500/30 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-5 max-w-lg w-full my-auto max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
               <div className="flex items-center gap-3">
-                <button onClick={() => setActiveModal(null)} className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl">
+                <button onClick={() => setActiveModal(null)} className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition">
                   <ArrowLeft className="w-5 h-5" />
                 </button>
-                <h3 className="text-xl font-bold text-rose-400">খরচ সমূহ</h3>
+                <h3 className="text-lg sm:text-xl font-extrabold text-teal-400">খরচ সমূহ</h3>
               </div>
               <button onClick={() => setActiveModal(null)} className="text-xs text-gray-400 hover:text-white">✕ বন্ধ করুন</button>
             </div>
 
-            <div className="bg-emerald-950/30 border border-emerald-500/30 p-3.5 rounded-xl text-sm">
-              <span className="text-emerald-400 font-medium">ব্যাচ এর নাম: </span>
+            <div className="bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl text-sm">
+              <span className="text-emerald-400 font-semibold">ব্যাচ এর নাম: </span>
               <span className="text-white font-bold">{selectedFlock.name}</span>
             </div>
 
@@ -1014,42 +1042,98 @@ export default function KhamarPage() {
                 <select
                   value={expenseCategory}
                   onChange={(e) => setExpenseCategory(e.target.value)}
-                  className="w-full bg-[#1a1f2c] border border-emerald-500/50 rounded-xl px-4 py-3 text-rose-300 focus:outline-none text-sm font-medium"
+                  className="w-full bg-[#1a1f2c] border border-emerald-500/50 rounded-xl px-4 py-3 text-rose-300 focus:outline-none text-sm font-medium cursor-pointer"
                 >
                   <option value="">--খরচ বাছাই করুন--</option>
                   <option value="খাদ্য বাবদ খরচ">খাদ্য বাবদ খরচ</option>
+                  <option value="গুঁড়া বাবদ খরচ">গুঁড়া বাবদ খরচ</option>
                   <option value="মেডিসিন খরচ">মেডিসিন খরচ</option>
                   <option value="পরিবহন খরচ">পরিবহন খরচ</option>
                   <option value="লিটার/তুষ খরচ">লিটার/তুষ খরচ</option>
                   <option value="শ্রমিকের বেতন">শ্রমিকের বেতন</option>
                   <option value="বিদ্যুৎ বিল">বিদ্যুৎ বিল</option>
-                  <option value="অন্যান্য খরচ">অন্যান্য খরচ</option>
                   <option value="বাচ্চা বাবদ খরচ">বাচ্চা বাবদ খরচ</option>
+                  <option value="অন্যান্য খরচ">অন্যান্য খরচ</option>
                 </select>
               </div>
 
-              <div>
-                <input
-                  type="number"
-                  placeholder="খরচের পরিমাণ"
-                  value={expenseAmount}
-                  onChange={(e) => setExpenseAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
-                />
-              </div>
+              {/* Conditional Form Inputs */}
+              {(expenseCategory === 'খাদ্য বাবদ খরচ' || expenseCategory === 'গুঁড়া বাবদ খরচ') ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 mb-1">বস্তার সংখ্যা</label>
+                      <input
+                        type="number"
+                        placeholder="বস্তার সংখ্যা"
+                        value={feedBagQty}
+                        onChange={(e) => setFeedBagQty(e.target.value === '' ? '' : Number(e.target.value))}
+                        className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-white placeholder-gray-500 focus:outline-none text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 mb-1">বস্তা প্রতি দাম (৳)</label>
+                      <input
+                        type="number"
+                        placeholder="বস্তা প্রতি দাম"
+                        value={feedPricePerBag}
+                        onChange={(e) => setFeedPricePerBag(e.target.value === '' ? '' : Number(e.target.value))}
+                        className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-white placeholder-gray-500 focus:outline-none text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* ONLY show "খাবারের ধরন" for "খাদ্য বাবদ খরচ". For "গুঁড়া বাবদ খরচ", this field is omitted! */}
+                  {expenseCategory === 'খাদ্য বাবদ খরচ' && (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 mb-1">খাবারের ধরন</label>
+                      <select
+                        value={feedType}
+                        onChange={(e) => setFeedType(e.target.value)}
+                        className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-rose-300 focus:outline-none text-sm font-medium cursor-pointer"
+                      >
+                        <option value="">--খাবারের ধরন--</option>
+                        <option value="স্টার্টার (Starter)">স্টার্টার (Starter)</option>
+                        <option value="গ্রোয়ার (Grower)">গ্রোয়ার (Grower)</option>
+                        <option value="লেয়ার-১ (Layer-1)">লেয়ার-১ (Layer-1)</option>
+                        <option value="লেয়ার-২ (Layer-2)">লেয়ার-২ (Layer-2)</option>
+                        <option value="ফিনিশার (Finisher)">ফিনিশার (Finisher)</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-between">
+                    <span className="text-xs font-bold text-gray-300">মোট হিসাবকৃত খরচ:</span>
+                    <span className="text-base font-black text-emerald-400">
+                      ৳ {((Number(feedBagQty) || 0) * (Number(feedPricePerBag) || 0)).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1">খরচের পরিমাণ (৳)</label>
+                  <input
+                    type="number"
+                    placeholder="খরচের পরিমাণ"
+                    value={expenseAmount}
+                    onChange={(e) => setExpenseAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
+                  />
+                </div>
+              )}
 
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-semibold py-3.5 rounded-full flex items-center justify-center gap-2 text-sm shadow-lg"
+                  className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-extrabold py-3 rounded-xl flex items-center justify-center gap-2 text-sm shadow-lg transition"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>খরচ যোগ করুন</span>
+                  <span>+ খরচ যোগ করুন</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleResetExpense}
-                  className="px-5 py-3.5 border border-gray-700 hover:bg-gray-800 text-gray-300 font-medium rounded-xl text-sm"
+                  className="px-4 py-3 border border-gray-700 hover:bg-gray-800 text-gray-300 font-medium rounded-xl text-sm flex items-center gap-1.5 transition"
                 >
                   <RefreshCw className="w-4 h-4" />
                   <span>রিসেট করুন</span>

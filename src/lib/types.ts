@@ -169,6 +169,9 @@ export interface BatchExpense {
   date: string;
   category: string;
   amount: number;
+  bagQty?: number;
+  pricePerBag?: number;
+  feedType?: string;
   note?: string;
 }
 
