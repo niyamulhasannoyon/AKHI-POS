@@ -65,6 +65,7 @@ export default function KhamarPage() {
   const [saleDate, setSaleDate] = useState(new Date().toISOString().slice(0, 10));
   const [buyerName, setBuyerName] = useState('');
   const [birdQtyPcs, setBirdQtyPcs] = useState<number | ''>('');
+  const [originalWeightKg, setOriginalWeightKg] = useState<number | ''>('');
   const [totalWeightKg, setTotalWeightKg] = useState<number | ''>('');
   const [pricePerKg, setPricePerKg] = useState<number | ''>('');
 
@@ -218,6 +219,7 @@ export default function KhamarPage() {
     setSaleDate(new Date().toISOString().slice(0, 10));
     setBuyerName('');
     setBirdQtyPcs('');
+    setOriginalWeightKg('');
     setTotalWeightKg('');
     setPricePerKg('');
   };
@@ -227,11 +229,12 @@ export default function KhamarPage() {
     if (!selectedFlock) return;
     if (!buyerName.trim()) return alert('অনুগ্রহ করে ক্রেতার নাম দিন');
     if (!birdQtyPcs || Number(birdQtyPcs) <= 0) return alert('অনুগ্রহ করে মুরগির সংখ্যা দিন');
-    if (!totalWeightKg || Number(totalWeightKg) <= 0) return alert('অনুগ্রহ করে মোট ওজন দিন');
+    if (!totalWeightKg || Number(totalWeightKg) <= 0) return alert('অনুগ্রহ করে বিক্রয় ওজন দিন');
     if (!pricePerKg || Number(pricePerKg) <= 0) return alert('অনুগ্রহ করে কেজি প্রতি দাম দিন');
 
     const pcs = Number(birdQtyPcs);
     const weight = Number(totalWeightKg);
+    const origWeight = originalWeightKg !== '' ? Number(originalWeightKg) : undefined;
     const rate = Number(pricePerKg);
     const totalAmount = weight * rate;
 
@@ -241,6 +244,7 @@ export default function KhamarPage() {
       date: saleDate,
       buyerName: buyerName.trim(),
       birdQty: pcs,
+      originalWeight: origWeight,
       totalWeight: weight,
       pricePerKg: rate,
       totalAmount
@@ -253,13 +257,14 @@ export default function KhamarPage() {
     farmStore.updateItem('flocks', selectedFlock.id, { currentQty: newQty });
 
     // Auto record in main Accounting
+    const weightNoteStr = origWeight ? ` (অরিজিনাল: ${origWeight}kg, বিক্রয়: ${weight}kg)` : ` (${weight}kg)`;
     farmStore.addItem('accounting', {
       id: `ACC-${Date.now().toString().slice(-4)}`,
       date: saleDate,
       type: 'Income',
       category: 'Live Bird Sales',
       amount: totalAmount,
-      note: `Batch: ${selectedFlock.name} - ${pcs} pcs (${weight}kg)`
+      note: `Batch: ${selectedFlock.name} - ${pcs} pcs${weightNoteStr}`
     });
 
     alert(`সাফল্যের সাথে ৳${totalAmount.toLocaleString()} টাকার বিক্রয় সংরক্ষণ করা হয়েছে!`);
@@ -945,28 +950,75 @@ export default function KhamarPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <input
-                    type="number"
-                    placeholder="মুরগির সংখ্যা (পিস)"
-                    value={birdQtyPcs}
-                    onChange={(e) => setBirdQtyPcs(e.target.value === '' ? '' : Number(e.target.value))}
-                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
-                  />
+              {/* If flock breed is Broiler (ব্রয়লার), show both Original Weight and Sale Weight */}
+              {(selectedFlock.breed?.toLowerCase().includes('ব্রয়লার') || selectedFlock.breed?.toLowerCase().includes('broiler')) ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 mb-1">মুরগির সংখ্যা (পিস)</label>
+                      <input
+                        type="number"
+                        placeholder="সংখ্যা (পিস)"
+                        value={birdQtyPcs}
+                        onChange={(e) => setBirdQtyPcs(e.target.value === '' ? '' : Number(e.target.value))}
+                        className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-white placeholder-gray-500 focus:outline-none text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-amber-400 mb-1">অরিজিনাল ওজন (কেজি)</label>
+                      <input
+                        type="number"
+                        placeholder="অরিজিনাল ওজন"
+                        value={originalWeightKg}
+                        onChange={(e) => {
+                          const val = e.target.value === '' ? '' : Number(e.target.value);
+                          setOriginalWeightKg(val);
+                          if (totalWeightKg === '' || totalWeightKg === originalWeightKg) {
+                            setTotalWeightKg(val);
+                          }
+                        }}
+                        className="w-full bg-[#1a1f2c] border border-amber-500/50 rounded-xl px-3.5 py-2.5 text-amber-300 placeholder-gray-500 focus:outline-none text-sm font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-emerald-400 mb-1">বিক্রয় ওজন (কেজি)</label>
+                      <input
+                        type="number"
+                        placeholder="বিক্রয় ওজন"
+                        value={totalWeightKg}
+                        onChange={(e) => setTotalWeightKg(e.target.value === '' ? '' : Number(e.target.value))}
+                        className="w-full bg-[#1a1f2c] border border-emerald-500/50 rounded-xl px-3.5 py-2.5 text-emerald-300 placeholder-gray-500 focus:outline-none text-sm font-bold"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <input
-                    type="number"
-                    placeholder="মোট ওজন (কেজি)"
-                    value={totalWeightKg}
-                    onChange={(e) => setTotalWeightKg(e.target.value === '' ? '' : Number(e.target.value))}
-                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
-                  />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1">মুরগির সংখ্যা (পিস)</label>
+                    <input
+                      type="number"
+                      placeholder="মুরগির সংখ্যা (পিস)"
+                      value={birdQtyPcs}
+                      onChange={(e) => setBirdQtyPcs(e.target.value === '' ? '' : Number(e.target.value))}
+                      className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1">মোট ওজন (কেজি)</label>
+                    <input
+                      type="number"
+                      placeholder="মোট ওজন (কেজি)"
+                      value={totalWeightKg}
+                      onChange={(e) => setTotalWeightKg(e.target.value === '' ? '' : Number(e.target.value))}
+                      className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
+                <label className="block text-xs font-semibold text-gray-400 mb-1">কেজি প্রতি দাম (৳)</label>
                 <input
                   type="number"
                   placeholder="কেজি প্রতি দাম"
@@ -1645,7 +1697,14 @@ export default function KhamarPage() {
                           <td className="font-bold text-white">{formatDate(s.date)}</td>
                           <td className="font-bold text-emerald-400">{s.buyerName}</td>
                           <td>{s.birdQty} টি</td>
-                          <td>{s.totalWeight} কেজি</td>
+                          <td>
+                            <span className="font-semibold text-white">{s.totalWeight} কেজি</span>
+                            {s.originalWeight ? (
+                              <span className="text-[10px] text-amber-400 block font-normal">
+                                (অরিজিনাল: {s.originalWeight} কেজি)
+                              </span>
+                            ) : null}
+                          </td>
                           <td>৳ {s.pricePerKg}</td>
                           <td className="font-extrabold text-teal-400">৳ {s.totalAmount.toLocaleString()}</td>
                         </tr>

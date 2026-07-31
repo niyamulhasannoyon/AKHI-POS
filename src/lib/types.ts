@@ -158,6 +158,7 @@ export interface BatchSale {
   date: string;
   buyerName: string;
   birdQty: number;
+  originalWeight?: number;
   totalWeight: number;
   pricePerKg: number;
   totalAmount: number;
