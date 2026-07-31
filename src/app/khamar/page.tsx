@@ -36,9 +36,10 @@ export default function KhamarPage() {
   // Navigation Tab inside Khamar: 'BATCHES' | 'DAILY_LOGS' | 'FINANCIALS'
   const [mainTab, setMainTab] = useState<'BATCHES' | 'DAILY_LOGS' | 'FINANCIALS'>('BATCHES');
 
-  // Active Modal: null | 'NEW_BATCH' | 'EDIT_BATCH' | 'BIRD_SALE' | 'EXPENSE' | 'MORTALITY' | 'DAILY_LOG' | 'REPORT'
+  // Active Modal: null | 'NEW_BATCH' | 'EDIT_BATCH' | 'BIRD_SALE' | 'EXPENSE' | 'MORTALITY' | 'DAILY_LOG' | 'REPORT' | 'BATCH_DETAILS'
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedFlock, setSelectedFlock] = useState<Flock | null>(null);
+  const [statementTab, setStatementTab] = useState<'SALES' | 'EXPENSES' | 'DAILY_LOGS'>('SALES');
 
   // Form State 1: New Batch (Matching User Screenshot with live time & date)
   const [batchName, setBatchName] = useState('');
@@ -1300,6 +1301,18 @@ export default function KhamarPage() {
                         <span>মুছুন</span>
                       </button>
                     </div>
+
+                    <button
+                      onClick={() => {
+                        setSelectedFlock(f);
+                        setStatementTab('SALES');
+                        setActiveModal('BATCH_DETAILS');
+                      }}
+                      className="w-full py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition"
+                    >
+                      <FileText className="w-4 h-4 text-emerald-400" />
+                      <span>📋 ফুল বিক্রয় ও খরচের স্টেটমেন্ট দেখুন</span>
+                    </button>
                   </div>
                 </div>
               );
@@ -1346,6 +1359,17 @@ export default function KhamarPage() {
                         </td>
                         <td>
                           <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => {
+                                setSelectedFlock(f);
+                                setStatementTab('SALES');
+                                setActiveModal('BATCH_DETAILS');
+                              }}
+                              className="p-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition"
+                              title="পূর্ণাঙ্গ স্টেটমেন্ট দেখুন"
+                            >
+                              <FileText className="w-4 h-4" />
+                            </button>
                             <button
                               onClick={() => openEditBatchModal(f)}
                               className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition"
@@ -1436,6 +1460,181 @@ export default function KhamarPage() {
                 ৳ {netProfitAll.toLocaleString()}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* BATCH DETAILS & FULL STATEMENT MODAL */}
+      {activeModal === 'BATCH_DETAILS' && selectedFlock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-6 shadow-2xl space-y-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+              <div>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400">
+                  {selectedFlock.status}
+                </span>
+                <h3 className="text-xl font-extrabold text-white mt-1 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-emerald-400" />
+                  <span>{selectedFlock.name} — পূর্ণাঙ্গ বিবরণী ও হিসাব (Batch Statement)</span>
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  জাত: {selectedFlock.breed} ({selectedFlock.companyName || 'N/A'}) • ঘর: {selectedFlock.houseNo} • বয়স: {calculateFlockAgeDays(selectedFlock.startDate)} দিন • শুরু: {formatDate(selectedFlock.startDate)}
+                </p>
+              </div>
+              <button onClick={() => setActiveModal(null)} className="text-xs text-gray-400 hover:text-white px-3 py-1.5 border border-gray-800 rounded-xl">✕ বন্ধ করুন</button>
+            </div>
+
+            {/* KPI Cards Summary for this Flock */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 bg-slate-900/90 rounded-xl border border-white/5">
+                <div className="text-[10px] text-gray-400">বর্তমান মুরগি / প্রাথমিক</div>
+                <div className="text-sm font-bold text-white mt-0.5">{selectedFlock.currentQty} / {selectedFlock.initialQty} টি</div>
+              </div>
+              <div className="p-3 bg-slate-900/90 rounded-xl border border-white/5">
+                <div className="text-[10px] text-gray-400">মোট মুরগি বিক্রয় (ইনকাম)</div>
+                <div className="text-sm font-extrabold text-teal-400 mt-0.5">৳ {getFlockMetrics(selectedFlock.id).totalSales.toLocaleString()}</div>
+              </div>
+              <div className="p-3 bg-slate-900/90 rounded-xl border border-white/5">
+                <div className="text-[10px] text-gray-400">মোট খামার খরচ (ব্যয়)</div>
+                <div className="text-sm font-extrabold text-rose-400 mt-0.5">৳ {getFlockMetrics(selectedFlock.id).totalExpenses.toLocaleString()}</div>
+              </div>
+              <div className="p-3 bg-slate-900/90 rounded-xl border border-white/5">
+                <div className="text-[10px] text-gray-400">নিট ব্যাচ লাভ/ক্ষতি</div>
+                <div className={`text-sm font-extrabold mt-0.5 ${getFlockMetrics(selectedFlock.id).profitOrLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  ৳ {getFlockMetrics(selectedFlock.id).profitOrLoss.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            {/* Statement Sub Tabs */}
+            <div className="flex items-center gap-2 border-b border-gray-800 pb-2">
+              <button
+                onClick={() => setStatementTab('SALES')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  statementTab === 'SALES' ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' : 'bg-white/5 text-gray-400 hover:text-white'
+                }`}
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+                <span>🛒 বিক্রয়ের বিবরণ ({batchSales.filter(s => s.flockId === selectedFlock.id).length})</span>
+              </button>
+              <button
+                onClick={() => setStatementTab('EXPENSES')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  statementTab === 'EXPENSES' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' : 'bg-white/5 text-gray-400 hover:text-white'
+                }`}
+              >
+                <DollarSign className="w-3.5 h-3.5" />
+                <span>💸 খরচের বিবরণ ({batchExpenses.filter(e => e.flockId === selectedFlock.id).length})</span>
+              </button>
+              <button
+                onClick={() => setStatementTab('DAILY_LOGS')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  statementTab === 'DAILY_LOGS' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-white/5 text-gray-400 hover:text-white'
+                }`}
+              >
+                <Activity className="w-3.5 h-3.5" />
+                <span>🥚 ডিম ও খাবার দৈনিক রেকর্ড ({khamariLogs.filter(l => l.flockId === selectedFlock.id).length})</span>
+              </button>
+            </div>
+
+            {/* Tab 1: Sales */}
+            {statementTab === 'SALES' && (
+              <div className="overflow-x-auto">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>তারিখ</th>
+                      <th>ক্রেতার নাম (Buyer)</th>
+                      <th>মুরগির সংখ্যা</th>
+                      <th>মোট ওজন (কেজি)</th>
+                      <th>দর (৳/কেজি)</th>
+                      <th>মোট বিক্রয় মূল্য</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {batchSales.filter(s => s.flockId === selectedFlock.id).length === 0 ? (
+                      <tr><td colSpan={6} className="text-center py-8 text-gray-500">এই ব্যাচে এখনও কোন বিক্রয় ইনপুট দেওয়া হয়নি</td></tr>
+                    ) : (
+                      batchSales.filter(s => s.flockId === selectedFlock.id).map(s => (
+                        <tr key={s.id}>
+                          <td className="font-bold text-white">{formatDate(s.date)}</td>
+                          <td className="font-bold text-emerald-400">{s.buyerName}</td>
+                          <td>{s.birdQty} টি</td>
+                          <td>{s.totalWeight} কেজি</td>
+                          <td>৳ {s.pricePerKg}</td>
+                          <td className="font-extrabold text-teal-400">৳ {s.totalAmount.toLocaleString()}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Tab 2: Expenses */}
+            {statementTab === 'EXPENSES' && (
+              <div className="overflow-x-auto">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>তারিখ</th>
+                      <th>খরচের খাত / ক্যাটাগরি</th>
+                      <th>টাকার পরিমাণ</th>
+                      <th>নোট / বিবরণ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {batchExpenses.filter(e => e.flockId === selectedFlock.id).length === 0 ? (
+                      <tr><td colSpan={4} className="text-center py-8 text-gray-500">এই ব্যাচে এখনও কোন আলাদা খরচ ইনপুট দেওয়া হয়নি</td></tr>
+                    ) : (
+                      batchExpenses.filter(e => e.flockId === selectedFlock.id).map(e => (
+                        <tr key={e.id}>
+                          <td className="font-bold text-white">{formatDate(e.date)}</td>
+                          <td><span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">{e.category}</span></td>
+                          <td className="font-extrabold text-rose-400">৳ {e.amount.toLocaleString()}</td>
+                          <td className="text-xs text-gray-400">{e.note || '-'}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Tab 3: Daily Logs */}
+            {statementTab === 'DAILY_LOGS' && (
+              <div className="overflow-x-auto">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>তারিখ</th>
+                      <th>ভালো ডিম (পিস)</th>
+                      <th>ফাটা ডিম</th>
+                      <th>খাদ্য (বস্তা)</th>
+                      <th>মৃত্যু (পিস)</th>
+                      <th>নোট</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {khamariLogs.filter(l => l.flockId === selectedFlock.id).length === 0 ? (
+                      <tr><td colSpan={6} className="text-center py-8 text-gray-500">কোন দৈনিক রেকর্ড পাওয়া যায়নি</td></tr>
+                    ) : (
+                      khamariLogs.filter(l => l.flockId === selectedFlock.id).map(l => (
+                        <tr key={l.id}>
+                          <td className="font-bold text-white">{formatDate(l.date)}</td>
+                          <td className="font-extrabold text-emerald-400">🥚 {l.eggGood}</td>
+                          <td className="text-rose-400">{l.eggDamaged}</td>
+                          <td className="font-bold text-amber-400">🌾 {l.feedBags} বস্তা</td>
+                          <td className="text-rose-400">☠ {l.mortality}</td>
+                          <td className="text-xs text-gray-400">{l.notes || '-'}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
