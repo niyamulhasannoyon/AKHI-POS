@@ -125,6 +125,7 @@ class FarmStore {
     this.state = DEFAULT_SEED;
     if (typeof window !== 'undefined') {
       this.state = this.loadFromLocalStorage();
+      this.syncCurrentUserRole();
       this.initRealtimeListeners();
       this.syncWithCloudDb();
     }
@@ -139,7 +140,12 @@ class FarmStore {
         this.broadcastChannel = new BroadcastChannel('AKHI_POS_BROADCAST_CHANNEL');
         this.broadcastChannel.onmessage = (event) => {
           if (event.data && event.data.type === 'REALTIME_STATE_UPDATE' && event.data.state) {
-            this.state = purgeDemoData({ ...DEFAULT_SEED, ...event.data.state }).state;
+            const incoming = event.data.state;
+            this.state = purgeDemoData({ ...DEFAULT_SEED, ...incoming }).state;
+            if (incoming.posAuthorizedEmails && Array.isArray(incoming.posAuthorizedEmails)) {
+              this.state.posAuthorizedEmails = incoming.posAuthorizedEmails;
+            }
+            this.syncCurrentUserRole();
             this.notifyLocal();
           }
         };
@@ -152,7 +158,12 @@ class FarmStore {
     window.addEventListener('storage', (e) => {
       if (e.key === STORAGE_KEY && e.newValue) {
         try {
-          this.state = purgeDemoData({ ...DEFAULT_SEED, ...JSON.parse(e.newValue) }).state;
+          const parsed = JSON.parse(e.newValue);
+          this.state = purgeDemoData({ ...DEFAULT_SEED, ...parsed }).state;
+          if (parsed.posAuthorizedEmails && Array.isArray(parsed.posAuthorizedEmails)) {
+            this.state.posAuthorizedEmails = parsed.posAuthorizedEmails;
+          }
+          this.syncCurrentUserRole();
           this.notifyLocal();
         } catch (_) {}
       }
@@ -179,7 +190,12 @@ class FarmStore {
     try {
       const item = localStorage.getItem(STORAGE_KEY);
       if (item) {
-        return purgeDemoData({ ...DEFAULT_SEED, ...JSON.parse(item) }).state;
+        const parsed = JSON.parse(item);
+        const mergedState = purgeDemoData({ ...DEFAULT_SEED, ...parsed }).state;
+        if (parsed.posAuthorizedEmails && Array.isArray(parsed.posAuthorizedEmails)) {
+          mergedState.posAuthorizedEmails = parsed.posAuthorizedEmails;
+        }
+        return mergedState;
       }
     } catch (e) {
       console.warn('Failed to load local storage state:', e);
@@ -226,15 +242,15 @@ class FarmStore {
             batchExpenses: mergeArr(this.state.batchExpenses, dbData.batchExpenses),
             khamars: mergeArr(this.state.khamars, dbData.khamars),
             customerPayments: mergeArr(this.state.customerPayments, dbData.customerPayments),
-            posAuthorizedEmails: mergeArr(this.state.posAuthorizedEmails, dbData.posAuthorizedEmails),
+            posAuthorizedEmails: dbData.posAuthorizedEmails && dbData.posAuthorizedEmails.length > 0
+              ? dbData.posAuthorizedEmails
+              : this.state.posAuthorizedEmails,
           };
           const { state: purgedState, purged } = purgeDemoData(merged);
           this.state = purgedState;
+          this.syncCurrentUserRole();
           localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
           this.notifyLocal();
-          // If any demo rows were purged after merging DB data, push the cleaned
-          // state back so Neon also drops the old demo records (flocks, suppliers,
-          // customers, products get delete-not-in-list cleanup server-side).
           if (purged) {
             this.pushToCloudDb();
           }
@@ -326,6 +342,9 @@ class FarmStore {
       };
       this.syncCurrentUserRole();
       this.saveState();
+      if (key === 'posAuthorizedEmails') {
+        this.pushToCloudDb();
+      }
     }
   }
 
@@ -349,6 +368,9 @@ class FarmStore {
         };
         this.syncCurrentUserRole();
         this.saveState();
+        if (key === 'posAuthorizedEmails') {
+          this.pushToCloudDb();
+        }
       }
     } else if (typeof this.state[key] === 'object' && this.state[key] !== null) {
       this.state = {
@@ -376,11 +398,16 @@ class FarmStore {
     }
   }
 
-  private syncCurrentUserRole() {
+  public syncCurrentUserRole() {
     if (this.state.currentUser && this.state.currentUser.email) {
       const currentRole = getActiveUserRole(this.state);
       if (currentRole === 'Guest') {
         this.state.currentUser = null;
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+          } catch (_) {}
+        }
       } else {
         this.state.currentUser = { ...this.state.currentUser, role: currentRole };
       }

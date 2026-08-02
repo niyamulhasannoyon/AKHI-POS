@@ -131,17 +131,6 @@ export default function GoogleAuthModal({ isOpen, onClose }: GoogleAuthModalProp
     }
   };
 
-  const handleDemoLogin = (role: 'Admin' | 'Manager' | 'Cashier') => {
-    const user: AuthUser = {
-      email: role === 'Admin' ? 'noyon@akhipos.com' : role === 'Manager' ? 'manager@akhipos.com' : 'cashier@akhipos.com',
-      name: role === 'Admin' ? 'নিয়ামুল হাসান (মালিক)' : role === 'Manager' ? 'ফার্ম ম্যানেজার' : 'ক্যাশিয়ার ডেস্ক-১',
-      picture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      role: role,
-    };
-    farmStore.setCurrentUser(user);
-    if (onClose) onClose();
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -178,31 +167,6 @@ export default function GoogleAuthModal({ isOpen, onClose }: GoogleAuthModalProp
           <div id="google-btn-container" className="min-h-[44px] flex justify-center items-center">
             {/* Native google button gets rendered here */}
             <div className="animate-pulse text-xs text-gray-400">গুগল সাইন ইন বাটন লোড হচ্ছে...</div>
-          </div>
-
-          <div className="flex items-center gap-2 text-[11px] text-gray-500 my-1">
-            <span className="w-8 h-px bg-gray-800" />
-            <span>অথবা ডেমো এক্সেস দিন</span>
-            <span className="w-8 h-px bg-gray-800" />
-          </div>
-
-          {/* Quick Demo Access Buttons */}
-          <div className="grid grid-cols-2 gap-2 w-full">
-            <button
-              onClick={() => handleDemoLogin('Admin')}
-              className="py-2.5 px-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5"
-            >
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Admin ডেমো</span>
-            </button>
-
-            <button
-              onClick={() => handleDemoLogin('Cashier')}
-              className="py-2.5 px-3 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5"
-            >
-              <LogIn className="w-4 h-4 text-blue-400" />
-              <span>Cashier ডেমো</span>
-            </button>
           </div>
         </div>
 

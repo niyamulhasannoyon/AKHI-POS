@@ -356,12 +356,13 @@ export async function POST(request: Request) {
       body.posAuthorizedEmails.forEach(pe => {
         tasks.push(sql`
           INSERT INTO pos_authorized_emails (id, email, name, role, status, added_date)
-          VALUES (${pe.id}, ${pe.email}, ${pe.name}, ${pe.role}, ${pe.status}, ${pe.addedDate})
-          ON CONFLICT (id) DO UPDATE SET
-            email = EXCLUDED.email,
+          VALUES (${pe.id}, ${pe.email.toLowerCase()}, ${pe.name}, ${pe.role}, ${pe.status}, ${pe.addedDate})
+          ON CONFLICT (email) DO UPDATE SET
+            id = EXCLUDED.id,
             name = EXCLUDED.name,
             role = EXCLUDED.role,
-            status = EXCLUDED.status;
+            status = EXCLUDED.status,
+            added_date = EXCLUDED.added_date;
         `);
       });
     }
