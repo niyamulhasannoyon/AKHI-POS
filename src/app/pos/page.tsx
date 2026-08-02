@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { farmStore } from '@/lib/store';
 import { Product, CartItem, Sale, Customer } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
-import { Search, ShoppingCart, Plus, Minus, Zap } from 'lucide-react';
+import { Search, ShoppingCart, Plus, Minus, Zap, UserPlus } from 'lucide-react';
 
 function generateId(prefix: string, sliceLength: number): string {
   const timestamp = Date.now().toString();
@@ -26,6 +26,50 @@ export default function POSPage() {
   const [paidAmount, setPaidAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('Cash');
   const [activeReceipt, setActiveReceipt] = useState<Sale | null>(null);
+
+  // Quick Add Customer Modal state for POS
+  const [showQuickCustModal, setShowQuickCustModal] = useState(false);
+  const [quickCustName, setQuickCustName] = useState('');
+  const [quickCustPhone, setQuickCustPhone] = useState('');
+  const [quickCustAddress, setQuickCustAddress] = useState('');
+  const [quickCustCategory, setQuickCustCategory] = useState<Customer['category']>('পাইকারী (Wholesale)');
+  const [quickCustInitialDue, setQuickCustInitialDue] = useState<number | ''>('');
+
+  const handleQuickCreateCustomer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickCustName.trim()) {
+      alert('অনুগ্রহ করে কাস্টমারের নাম লিখুন');
+      return;
+    }
+    const dueAmount = quickCustInitialDue ? Number(quickCustInitialDue) : 0;
+    const newCust: Customer = {
+      id: generateId('CUST', 4),
+      name: quickCustName.trim(),
+      phone: quickCustPhone.trim() || 'N/A',
+      address: quickCustAddress.trim() || 'N/A',
+      category: quickCustCategory,
+      due: dueAmount,
+      totalPurchases: 0
+    };
+    farmStore.addItem('customers', newCust);
+    if (dueAmount > 0) {
+      farmStore.addItem('accounting', {
+        id: generateId('ACC', 4),
+        date: new Date().toISOString().slice(0, 10),
+        type: 'Income',
+        category: 'Opening Customer Due',
+        amount: dueAmount,
+        note: `Opening due for customer ${quickCustName}`
+      });
+    }
+    setSelectedCustomer(newCust.id);
+    setQuickCustName('');
+    setQuickCustPhone('');
+    setQuickCustAddress('');
+    setQuickCustInitialDue('');
+    setShowQuickCustModal(false);
+    alert(`নতুন কাস্টমার "${newCust.name}" যুক্ত করা হয়েছে ও কার্টে সিলেক্ট করা হয়েছে!`);
+  };
 
   useEffect(() => {
     const update = () => {
@@ -218,12 +262,23 @@ export default function POSPage() {
 
           {/* Customer Selection with Live Autocomplete Suggestions */}
           <div className="mt-3 relative">
-            <label className="text-xs text-gray-400 font-medium block mb-1">Customer Account (কাস্টমার সিলেক্ট বা সার্চ করুন)</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-gray-400 font-medium">Customer Account (কাস্টমার সিলেক্ট করুন)</label>
+              <button
+                type="button"
+                onClick={() => setShowQuickCustModal(true)}
+                className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-0.5 rounded-lg border border-emerald-500/30 transition"
+              >
+                <UserPlus className="w-3 h-3" />
+                <span>+ নতুন কাস্টমার</span>
+              </button>
+            </div>
             <select
               value={selectedCustomer}
               onChange={(e) => setSelectedCustomer(e.target.value)}
               className="w-full bg-slate-900/80 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-medium"
             >
+              <option value="">Walk-in Customer (সাধারণ ক্যাশ ক্রেতা)</option>
               {customers.map(c => (
                 <option key={c.id} value={c.id}>
                   {c.name} ({c.phone || 'N/A'}) {c.due > 0 ? `[বাকি: ৳${c.due}]` : ''}
@@ -352,6 +407,110 @@ export default function POSPage() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '10px' }}>*** Thank You ***</div>
+        </div>
+      )}
+      {/* Quick Add Customer Modal Dialog inside POS Page */}
+      {showQuickCustModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-6 shadow-2xl space-y-5 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-extrabold text-emerald-400">নতুন কাস্টমার যোগ করুন</h3>
+                  <p className="text-[11px] text-gray-400">ইনভয়েস তৈরির সময় দ্রুত কাস্টমার রেজিস্টার করুন</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowQuickCustModal(false)}
+                className="w-7 h-7 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleQuickCreateCustomer} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-gray-300 font-medium mb-1">কাস্টমার / দোকান নাম <span className="text-rose-400">*</span></label>
+                <input
+                  type="text"
+                  placeholder="যেমন: আল-মদিনা পোল্ট্রি"
+                  value={quickCustName}
+                  onChange={(e) => setQuickCustName(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm transition"
+                  autoFocus
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-gray-300 font-medium mb-1">মোবাইল নম্বর</label>
+                  <input
+                    type="text"
+                    placeholder="01700-000000"
+                    value={quickCustPhone}
+                    onChange={(e) => setQuickCustPhone(e.target.value)}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-emerald-400 font-semibold mb-1">ক্যাটাগরি</label>
+                  <select
+                    value={quickCustCategory}
+                    onChange={(e) => setQuickCustCategory(e.target.value as any)}
+                    className="w-full bg-[#1a1f2c] border border-emerald-500/50 rounded-xl px-3 py-2.5 text-emerald-300 focus:outline-none focus:border-emerald-400 text-xs font-medium transition"
+                  >
+                    <option value="পাইকারী (Wholesale)">পাইকারী (Wholesale)</option>
+                    <option value="খুচরা (Retailer)">খুচরা (Retailer)</option>
+                    <option value="ডিলার (Dealer)">ডিলার (Dealer)</option>
+                    <option value="হোটেল/রেস্টুরেন্ট">হোটেল/রেস্টুরেন্ট</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-300 font-medium mb-1">ঠিকানা / এলাকা</label>
+                <input
+                  type="text"
+                  placeholder="যেমন: জয়দেবপুর বাজার"
+                  value={quickCustAddress}
+                  onChange={(e) => setQuickCustAddress(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-300 font-medium mb-1">পূর্বের প্রারম্ভিক বকেয়া (যদি থাকে ৳)</label>
+                <input
+                  type="number"
+                  placeholder="৳ 0"
+                  value={quickCustInitialDue}
+                  onChange={(e) => setQuickCustInitialDue(e.target.value === '' ? '' : Number(e.target.value))}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-rose-400 font-bold placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm transition"
+                />
+              </div>
+
+              <div className="flex items-center gap-2.5 pt-3 border-t border-gray-800">
+                <button
+                  type="submit"
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-full flex items-center justify-center gap-2 shadow-lg text-xs transition"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>+ যোগ ও কার্টে সিলেক্ট করুন</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowQuickCustModal(false)}
+                  className="px-4 py-3 border border-gray-700 hover:bg-gray-800 text-gray-300 font-medium rounded-xl text-xs transition"
+                >
+                  বাতিল
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

@@ -368,276 +368,332 @@ export default function CustomersPage() {
 
       {/* 1. ADD NEW CUSTOMER MODAL */}
       {showAddModal && (
-        <div className="bg-[#121620] border border-emerald-500/30 rounded-2xl p-6 shadow-2xl space-y-6 max-w-xl mx-auto">
-          <div className="flex items-center justify-between border-b border-gray-800 pb-4">
-            <h3 className="text-xl font-bold text-emerald-400">নতুন গ্রাহক যোগ করুন</h3>
-            <button onClick={() => setShowAddModal(false)} className="text-xs text-gray-400 hover:text-white">✕ বন্ধ করুন</button>
-          </div>
-
-          <form onSubmit={handleAddCustomer} className="space-y-4">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">গ্রাহকের নাম</label>
-              <input
-                type="text"
-                placeholder="যেমন: রাহিম ট্রেডার্স"
-                value={custName}
-                onChange={(e) => setCustName(e.target.value)}
-                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm"
-              />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-emerald-400">নতুন কাস্টমার যোগ করুন</h3>
+                  <p className="text-xs text-gray-400">পাইকারী, খুচরা বা ডিলারের বিস্তারিত নাম ও বিবরণ প্রদান করুন</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white text-sm">✕</button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleAddCustomer} className="space-y-4">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">মোবাইল ফোন</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">গ্রাহক / প্রতিষ্ঠানের নাম <span className="text-rose-400">*</span></label>
                 <input
                   type="text"
-                  placeholder="01700-000000"
-                  value={custPhone}
-                  onChange={(e) => setCustPhone(e.target.value)}
-                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm"
+                  placeholder="যেমন: রাহিম পোল্ট্রি ট্রেডার্স"
+                  value={custName}
+                  onChange={(e) => setCustName(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm transition"
+                  autoFocus
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">মোবাইল ফোন নম্বর</label>
+                  <input
+                    type="text"
+                    placeholder="01700-000000"
+                    value={custPhone}
+                    onChange={(e) => setCustPhone(e.target.value)}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-emerald-400 mb-1">ক্যাটাগরি</label>
+                  <select
+                    value={custCategory}
+                    onChange={(e) => setCustCategory(e.target.value as any)}
+                    className="w-full bg-[#1a1f2c] border border-emerald-500/50 rounded-xl px-4 py-3 text-emerald-300 focus:outline-none focus:border-emerald-400 text-sm font-medium transition"
+                  >
+                    <option value="পাইকারী (Wholesale)">পাইকারী (Wholesale)</option>
+                    <option value="খুচরা (Retailer)">খুচরা (Retailer)</option>
+                    <option value="ডিলার (Dealer)">ডিলার (Dealer)</option>
+                    <option value="হোটেল/রেস্টুরেন্ট">হোটেল/রেস্টুরেন্ট</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-300 mb-1">ঠিকানা / এলাকা</label>
+                <input
+                  type="text"
+                  placeholder="যেমন: গাজীপুর সদর মার্কেট"
+                  value={custAddress}
+                  onChange={(e) => setCustAddress(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-gray-400 mb-1">ক্যাটাগরি</label>
-                <select
-                  value={custCategory}
-                  onChange={(e) => setCustCategory(e.target.value as any)}
-                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-emerald-300 focus:outline-none text-sm"
-                >
-                  <option value="পাইকারী (Wholesale)">পাইকারী (Wholesale)</option>
-                  <option value="খুচরা (Retailer)">খুচরা (Retailer)</option>
-                  <option value="ডিলার (Dealer)">ডিলার (Dealer)</option>
-                  <option value="হোটেল/রেস্টুরেন্ট">হোটেল/রেস্টুরেন্ট</option>
-                </select>
+                <label className="block text-xs font-medium text-gray-300 mb-1">পূর্বের প্রারম্ভিক বকেয়া (যদি থাকে ৳)</label>
+                <input
+                  type="number"
+                  placeholder="৳ 0"
+                  value={custInitialDue}
+                  onChange={(e) => setCustInitialDue(e.target.value === '' ? '' : Number(e.target.value))}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-rose-400 font-bold placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm transition"
+                />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">ঠিকানা</label>
-              <input
-                type="text"
-                placeholder="যেমন: গাজীপুর সদর মার্কেট"
-                value={custAddress}
-                onChange={(e) => setCustAddress(e.target.value)}
-                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">পূর্বের প্রারম্ভিক বকেয়া (যদি থাকে)</label>
-              <input
-                type="number"
-                placeholder="৳ 0"
-                value={custInitialDue}
-                onChange={(e) => setCustInitialDue(e.target.value === '' ? '' : Number(e.target.value))}
-                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg text-sm mt-2"
-            >
-              + গ্রাহক সংরক্ষণ করুন
-            </button>
-          </form>
+              <div className="flex items-center gap-3 pt-3 border-t border-gray-800">
+                <button
+                  type="submit"
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-5 rounded-full flex items-center justify-center gap-2 shadow-lg text-sm transition"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ গ্রাহক সংরক্ষণ করুন</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-5 py-3.5 border border-gray-700 hover:bg-gray-800 text-gray-300 font-medium rounded-xl text-sm transition"
+                >
+                  বাতিল
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
       {/* EDIT CUSTOMER MODAL */}
       {showEditModal && activeCustomer && (
-        <div className="bg-[#121620] border border-blue-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-xl mx-auto">
-          <div className="flex items-center justify-between border-b border-gray-800 pb-4">
-            <h3 className="text-xl font-bold text-blue-400">গ্রাহকের তথ্য এডিট করুন</h3>
-            <button onClick={() => setShowEditModal(false)} className="text-xs text-gray-400 hover:text-white">✕ বন্ধ করুন</button>
-          </div>
-
-          <form onSubmit={handleUpdateCustomer} className="space-y-4">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">গ্রাহকের নাম</label>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
-              />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#121620] border border-blue-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                  <Edit className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-blue-400">গ্রাহকের তথ্য এডিট করুন</h3>
+                  <p className="text-xs text-gray-400">ID: {activeCustomer.id}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowEditModal(false)} className="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white text-sm">✕</button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleUpdateCustomer} className="space-y-4">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">মোবাইল ফোন</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">গ্রাহকের নাম</label>
                 <input
                   type="text"
-                  value={editPhone}
-                  onChange={(e) => setEditPhone(e.target.value)}
-                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm transition"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">মোবাইল ফোন</label>
+                  <input
+                    type="text"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-emerald-400 mb-1">ক্যাটাগরি</label>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value as any)}
+                    className="w-full bg-[#1a1f2c] border border-emerald-500/50 rounded-xl px-4 py-3 text-emerald-300 focus:outline-none text-sm font-medium transition"
+                  >
+                    <option value="পাইকারী (Wholesale)">পাইকারী (Wholesale)</option>
+                    <option value="খুচরা (Retailer)">খুচরা (Retailer)</option>
+                    <option value="ডিলার (Dealer)">ডিলার (Dealer)</option>
+                    <option value="হোটেল/রেস্টুরেন্ট">হোটেল/রেস্টুরেন্ট</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-300 mb-1">ঠিকানা</label>
+                <input
+                  type="text"
+                  value={editAddress}
+                  onChange={(e) => setEditAddress(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-gray-400 mb-1">ক্যাটাগরি</label>
-                <select
-                  value={editCategory}
-                  onChange={(e) => setEditCategory(e.target.value as any)}
-                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-emerald-300 focus:outline-none text-sm"
-                >
-                  <option value="পাইকারী (Wholesale)">পাইকারী (Wholesale)</option>
-                  <option value="খুচরা (Retailer)">খুচরা (Retailer)</option>
-                  <option value="ডিলার (Dealer)">ডিলার (Dealer)</option>
-                  <option value="হোটেল/রেস্টুরেন্ট">হোটেল/রেস্টুরেন্ট</option>
-                </select>
+                <label className="block text-xs font-medium text-gray-300 mb-1">বর্তমান বকেয়া (৳)</label>
+                <input
+                  type="number"
+                  value={editDue}
+                  onChange={(e) => setEditDue(e.target.value === '' ? '' : Number(e.target.value))}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-rose-400 font-bold focus:outline-none focus:border-blue-500 text-sm transition"
+                />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">ঠিকানা</label>
-              <input
-                type="text"
-                value={editAddress}
-                onChange={(e) => setEditAddress(e.target.value)}
-                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">বর্তমান বকেয়া (৳)</label>
-              <input
-                type="number"
-                value={editDue}
-                onChange={(e) => setEditDue(e.target.value === '' ? '' : Number(e.target.value))}
-                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-rose-400 font-bold focus:outline-none focus:border-blue-500 text-sm"
-              />
-            </div>
-
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                type="submit"
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg text-sm"
-              >
-                ✓ আপডেট সংরক্ষণ করুন
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-3 border border-gray-700 hover:bg-gray-800 text-gray-300 rounded-xl text-sm"
-              >
-                বাতিল
-              </button>
-            </div>
-          </form>
+              <div className="flex items-center gap-3 pt-3 border-t border-gray-800">
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 px-5 rounded-full flex items-center justify-center gap-2 shadow-lg text-sm transition"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>✓ আপডেট সংরক্ষণ করুন</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-5 py-3.5 border border-gray-700 hover:bg-gray-800 text-gray-300 font-medium rounded-xl text-sm transition"
+                >
+                  বাতিল
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
       {/* 2. RECEIVE PAYMENT MODAL */}
       {showPaymentModal && activeCustomer && (
-        <div className="bg-[#121620] border border-amber-500/30 rounded-2xl p-6 shadow-2xl space-y-6 max-w-lg mx-auto">
-          <div className="flex items-center justify-between border-b border-gray-800 pb-4">
-            <h3 className="text-xl font-bold text-amber-400">বাকি টাকা আদায় (Due Collection)</h3>
-            <button onClick={() => setShowPaymentModal(false)} className="text-xs text-gray-400 hover:text-white">✕ বন্ধ করুন</button>
-          </div>
-
-          <div className="bg-slate-900 p-3.5 rounded-xl border border-gray-800 text-sm">
-            <div className="text-gray-400 text-xs">গ্রাহকের নাম: <b className="text-white">{activeCustomer.name}</b></div>
-            <div className="text-rose-400 font-bold mt-1">বর্তমান মোট বকেয়া: ৳ {activeCustomer.due.toLocaleString()}</div>
-          </div>
-
-          <form onSubmit={handleReceivePayment} className="space-y-4">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">আদায়কৃত টাকার পরিমাণ (৳)</label>
-              <input
-                type="number"
-                placeholder="যেমন: 5000"
-                value={payAmount}
-                onChange={(e) => setPayAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                className="w-full bg-[#1a1f2c] border border-amber-500/50 rounded-xl px-4 py-3 text-amber-300 font-bold text-lg focus:outline-none"
-              />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#121620] border border-amber-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-amber-400">বাকি টাকা আদায় (Due Collection)</h3>
+                  <p className="text-xs text-gray-400">কাস্টমারের থেকে দেনা বুঝে পাওয়ার এন্ট্রি দিন</p>
+                </div>
+              </div>
+              <button onClick={() => setShowPaymentModal(false)} className="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white text-sm">✕</button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">পেমেন্ট মেথড</label>
-                <select
-                  value={payMethod}
-                  onChange={(e) => setPayMethod(e.target.value)}
-                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none"
-                >
-                  <option value="Cash">ক্যাশ (নগদ)</option>
-                  <option value="Bkash">বিকাশ (bKash)</option>
-                  <option value="Nagad">নগদ (Nagad)</option>
-                  <option value="Bank">ব্যাংক ট্রান্সফার</option>
-                </select>
-              </div>
+            <div className="bg-amber-500/10 p-4 rounded-xl border border-amber-500/30 text-sm">
+              <div className="text-gray-300 text-xs font-medium">গ্রাহকের নাম: <b className="text-white text-sm">{activeCustomer.name}</b></div>
+              <div className="text-rose-400 font-extrabold text-base mt-1">বর্তমান মোট বকেয়া: ৳ {activeCustomer.due.toLocaleString()}</div>
+            </div>
 
+            <form onSubmit={handleReceivePayment} className="space-y-4">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">তারিখ</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">আদায়কৃত টাকার পরিমাণ (৳) <span className="text-rose-400">*</span></label>
                 <input
-                  type="date"
-                  value={payDate}
-                  onChange={(e) => setPayDate(e.target.value)}
-                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none"
+                  type="number"
+                  placeholder="যেমন: 5000"
+                  value={payAmount}
+                  onChange={(e) => setPayAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                  className="w-full bg-[#1a1f2c] border border-amber-500/50 rounded-xl px-4 py-3 text-amber-300 font-extrabold text-xl focus:outline-none focus:border-amber-400 transition"
+                  autoFocus
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">নোট / বিবরণ (ঐচ্ছিক)</label>
-              <input
-                type="text"
-                placeholder="যেমন: রসিদ নং #104"
-                value={payNote}
-                onChange={(e) => setPayNote(e.target.value)}
-                className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none"
-              />
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">পেমেন্ট মেথড</label>
+                  <select
+                    value={payMethod}
+                    onChange={(e) => setPayMethod(e.target.value)}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-amber-500 transition"
+                  >
+                    <option value="Cash">ক্যাশ (নগদ)</option>
+                    <option value="Bkash">বিকাশ (bKash)</option>
+                    <option value="Nagad">নগদ (Nagad)</option>
+                    <option value="Bank">ব্যাংক ট্রান্সফার</option>
+                  </select>
+                </div>
 
-            <button
-              type="submit"
-              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow-lg text-sm"
-            >
-              ✓ টাকা জমা নিশ্চিত করুন
-            </button>
-          </form>
+                <div>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">তারিখ</label>
+                  <input
+                    type="date"
+                    value={payDate}
+                    onChange={(e) => setPayDate(e.target.value)}
+                    className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-amber-400 text-sm font-medium focus:outline-none transition cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-300 mb-1">নোট / বিবরণ (ঐচ্ছিক)</label>
+                <input
+                  type="text"
+                  placeholder="যেমন: রসিদ নং #104"
+                  value={payNote}
+                  onChange={(e) => setPayNote(e.target.value)}
+                  className="w-full bg-[#1a1f2c] border border-gray-700/80 rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-amber-500 transition"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-3 border-t border-gray-800">
+                <button
+                  type="submit"
+                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3.5 px-5 rounded-full flex items-center justify-center gap-2 shadow-lg text-sm transition"
+                >
+                  <DollarSign className="w-4 h-4" />
+                  <span>✓ টাকা জমা নিশ্চিত করুন</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPaymentModal(false)}
+                  className="px-5 py-3.5 border border-gray-700 hover:bg-gray-800 text-gray-300 font-medium rounded-xl text-sm transition"
+                >
+                  বাতিল
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
       {/* 3. DELETE CUSTOMER CONFIRMATION MODAL */}
       {deleteCustId && (
-        <div className="bg-[#121620] border border-rose-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-md mx-auto">
-          <div className="flex items-center justify-between border-b border-gray-800 pb-4">
-            <h3 className="text-xl font-bold text-rose-400 flex items-center gap-2">
-              <Trash2 className="w-5 h-5" />
-              <span>কাস্টমার মুছে ফেলবেন?</span>
-            </h3>
-            <button onClick={() => setDeleteCustId(null)} className="text-xs text-gray-400 hover:text-white">✕ বন্ধ করুন</button>
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#121620] border border-rose-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-md w-full">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+              <h3 className="text-xl font-bold text-rose-400 flex items-center gap-2">
+                <Trash2 className="w-5 h-5" />
+                <span>কাস্টমার মুছে ফেলবেন?</span>
+              </h3>
+              <button onClick={() => setDeleteCustId(null)} className="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white text-sm">✕</button>
+            </div>
 
-          <p className="text-sm text-gray-300 leading-relaxed">
-            আপনি কি নিশ্চিতভাবে <b className="text-white">{deleteCustId.name}</b> কে মুছে ফেলতে চান? এই কাজটি আর ফেরানো যাবে না।
-          </p>
+            <p className="text-sm text-gray-300 leading-relaxed">
+              আপনি কি নিশ্চিতভাবে <b className="text-white">{deleteCustId.name}</b> কে মুছে ফেলতে চান? এই কাজটি আর ফেরানো যাবে না।
+            </p>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={confirmDeleteCustomer}
-              className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl shadow-lg text-sm"
-            >
-              হ্যাঁ, মুছে ফেলুন
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeleteCustId(null)}
-              className="px-4 py-3 border border-gray-700 hover:bg-gray-800 text-gray-300 rounded-xl text-sm"
-            >
-              বাতিল
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={confirmDeleteCustomer}
+                className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-full shadow-lg text-sm transition"
+              >
+                হ্যাঁ, মুছে ফেলুন
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeleteCustId(null)}
+                className="px-5 py-3.5 border border-gray-700 hover:bg-gray-800 text-gray-300 font-medium rounded-xl text-sm transition"
+              >
+                বাতিল
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* 4. CUSTOMER SEPARATE DETAILED PROFILE MODAL */}
       {showProfileModal && activeCustomer && (
-        <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-4xl mx-auto">
-          {/* Header */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-800 pb-4">
             <div className="flex items-center gap-3">
               <button onClick={() => setShowProfileModal(false)} className="p-2 bg-gray-800/60 hover:bg-gray-800 text-gray-300 rounded-xl">
@@ -770,7 +826,8 @@ export default function CustomersPage() {
             );
           })()}
         </div>
-      )}
+      </div>
+    )}
     </div>
   );
 }

@@ -195,26 +195,38 @@ class FarmStore {
         const json = await res.json();
         if (json.success && json.data) {
           const dbData = json.data;
-          const merged = {
+          const mergeArr = <T extends { id: string }>(localArr: T[] = [], dbArr: T[] = []): T[] => {
+            if (!Array.isArray(dbArr) || dbArr.length === 0) return localArr || [];
+            const map = new Map<string, T>();
+            dbArr.forEach(item => { if (item && item.id) map.set(item.id, item); });
+            (localArr || []).forEach(item => {
+              if (item && item.id && !map.has(item.id)) {
+                map.set(item.id, item);
+              }
+            });
+            return Array.from(map.values());
+          };
+
+          const merged: FarmState = {
             ...this.state,
             ...dbData,
             settings: { ...this.state.settings, ...(dbData.settings || {}) },
-            flocks: dbData.flocks && dbData.flocks.length > 0 ? dbData.flocks : this.state.flocks,
-            products: dbData.products && dbData.products.length > 0 ? dbData.products : this.state.products,
-            customers: dbData.customers && dbData.customers.length > 0 ? dbData.customers : this.state.customers,
-            suppliers: dbData.suppliers && dbData.suppliers.length > 0 ? dbData.suppliers : this.state.suppliers,
-            sales: dbData.sales && dbData.sales.length > 0 ? dbData.sales : this.state.sales,
-            accounting: dbData.accounting && dbData.accounting.length > 0 ? dbData.accounting : this.state.accounting,
-            khamariLogs: dbData.khamariLogs && dbData.khamariLogs.length > 0 ? dbData.khamariLogs : this.state.khamariLogs,
-            feedIngredients: dbData.feedIngredients && dbData.feedIngredients.length > 0 ? dbData.feedIngredients : this.state.feedIngredients,
-            loans: dbData.loans && dbData.loans.length > 0 ? dbData.loans : this.state.loans,
-            installments: dbData.installments && dbData.installments.length > 0 ? dbData.installments : this.state.installments,
-            employees: dbData.employees && dbData.employees.length > 0 ? dbData.employees : this.state.employees,
-            batchSales: dbData.batchSales && dbData.batchSales.length > 0 ? dbData.batchSales : this.state.batchSales,
-            batchExpenses: dbData.batchExpenses && dbData.batchExpenses.length > 0 ? dbData.batchExpenses : this.state.batchExpenses,
-            khamars: dbData.khamars && dbData.khamars.length > 0 ? dbData.khamars : this.state.khamars,
-            customerPayments: dbData.customerPayments && dbData.customerPayments.length > 0 ? dbData.customerPayments : this.state.customerPayments,
-            posAuthorizedEmails: dbData.posAuthorizedEmails && dbData.posAuthorizedEmails.length > 0 ? dbData.posAuthorizedEmails : this.state.posAuthorizedEmails,
+            flocks: mergeArr(this.state.flocks, dbData.flocks),
+            products: mergeArr(this.state.products, dbData.products),
+            customers: mergeArr(this.state.customers, dbData.customers),
+            suppliers: mergeArr(this.state.suppliers, dbData.suppliers),
+            sales: mergeArr(this.state.sales, dbData.sales),
+            accounting: mergeArr(this.state.accounting, dbData.accounting),
+            khamariLogs: mergeArr(this.state.khamariLogs, dbData.khamariLogs),
+            feedIngredients: mergeArr(this.state.feedIngredients, dbData.feedIngredients),
+            loans: mergeArr(this.state.loans, dbData.loans),
+            installments: mergeArr(this.state.installments, dbData.installments),
+            employees: mergeArr(this.state.employees, dbData.employees),
+            batchSales: mergeArr(this.state.batchSales, dbData.batchSales),
+            batchExpenses: mergeArr(this.state.batchExpenses, dbData.batchExpenses),
+            khamars: mergeArr(this.state.khamars, dbData.khamars),
+            customerPayments: mergeArr(this.state.customerPayments, dbData.customerPayments),
+            posAuthorizedEmails: mergeArr(this.state.posAuthorizedEmails, dbData.posAuthorizedEmails),
           };
           const { state: purgedState, purged } = purgeDemoData(merged);
           this.state = purgedState;
@@ -307,7 +319,11 @@ class FarmStore {
   public addItem<K extends keyof FarmState>(key: K, item: FarmState[K] extends (infer T)[] ? T : FarmState[K]) {
     const list = this.state[key];
     if (Array.isArray(list)) {
-      (list as unknown as unknown[]).unshift(item);
+      const newList = [item, ...(list as unknown as unknown[])];
+      this.state = {
+        ...this.state,
+        [key]: newList
+      };
       this.syncCurrentUserRole();
       this.saveState();
     }
@@ -322,20 +338,38 @@ class FarmStore {
     if (Array.isArray(list)) {
       const idx = (list as unknown as { id: string }[]).findIndex(x => x.id === id);
       if (idx !== -1) {
-        (list as unknown as Record<string, unknown>[])[idx] = {
-          ...(list as unknown as Record<string, unknown>[])[idx],
+        const newList = [...(list as unknown as Record<string, unknown>[])];
+        newList[idx] = {
+          ...newList[idx],
           ...updatedFields
+        };
+        this.state = {
+          ...this.state,
+          [key]: newList
         };
         this.syncCurrentUserRole();
         this.saveState();
       }
+    } else if (typeof this.state[key] === 'object' && this.state[key] !== null) {
+      this.state = {
+        ...this.state,
+        [key]: {
+          ...(this.state[key] as unknown as Record<string, unknown>),
+          ...updatedFields
+        }
+      };
+      this.saveState();
     }
   }
 
   public deleteItem<K extends keyof FarmState>(key: K, id: string) {
     const list = this.state[key];
     if (Array.isArray(list)) {
-      this.state[key] = (list as unknown as { id: string }[]).filter(x => x.id !== id) as unknown as FarmState[K];
+      const newList = (list as unknown as { id: string }[]).filter(x => x.id !== id);
+      this.state = {
+        ...this.state,
+        [key]: newList
+      };
       this.syncCurrentUserRole();
       this.saveState();
       this.pushToCloudDb();

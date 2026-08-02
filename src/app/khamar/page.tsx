@@ -547,7 +547,10 @@ export default function KhamarPage() {
       {/* 1. PROFESSIONAL MODAL: NEW BATCH CREATION (Professional Dialog & Live Time) */}
       {/* ========================================================================= */}
       {activeModal === 'NEW_BATCH' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setActiveModal(null); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
+        >
           <div className="bg-[#121620] border border-emerald-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-800 pb-4">
@@ -724,7 +727,10 @@ export default function KhamarPage() {
 
       {/* EDIT BATCH MODAL */}
       {activeModal === 'EDIT_BATCH' && selectedFlock && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setActiveModal(null); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
+        >
           <div className="bg-[#121620] border border-amber-500/40 rounded-2xl p-6 shadow-2xl space-y-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-gray-800 pb-4">
               <div className="flex items-center gap-3">
