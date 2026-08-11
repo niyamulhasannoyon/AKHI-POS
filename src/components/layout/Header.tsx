@@ -33,10 +33,13 @@ export default function Header({ onToggleMobileSidebar, onOpenAuthModal }: Heade
     updateStats();
     const unsub = farmStore.subscribe(updateStats);
 
-    const timer = setInterval(() => {
+    const updateClock = () => {
       const now = new Date();
       setTimeStr(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-    }, 1000);
+    };
+    updateClock();
+
+    const timer = setInterval(updateClock, 1000);
 
     return () => {
       unsub();

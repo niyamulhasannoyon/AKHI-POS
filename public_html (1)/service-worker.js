@@ -1,1 +1,0 @@
-// Component: service-worker.js

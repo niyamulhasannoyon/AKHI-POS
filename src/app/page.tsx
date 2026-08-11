@@ -39,6 +39,9 @@ export default function DashboardPage() {
     return () => unsub();
   }, []);
 
+  const currentUser = state.currentUser;
+  const isAdmin = currentUser?.role === 'Admin';
+
   const sales = state.sales || [];
   const acc = state.accounting || [];
   const flocks = state.flocks || [];
@@ -179,18 +182,26 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {sales.slice(0, 5).map(s => (
-                  <tr key={s.id}>
-                    <td className="font-bold text-emerald-400">{s.id}</td>
-                    <td>{s.customerName}</td>
-                    <td className="font-bold text-white">{formatCurrency(s.grandTotal)}</td>
-                    <td>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400">
-                        {s.paymentMethod}
-                      </span>
+                {sales.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-6 text-gray-500 text-xs font-medium">
+                      কোনো সাম্প্রতিক বিক্রয় লেনদেন পাওয়া যায়নি।
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  sales.slice(0, 5).map(s => (
+                    <tr key={s.id}>
+                      <td className="font-bold text-emerald-400">{s.id}</td>
+                      <td>{s.customerName}</td>
+                      <td className="font-bold text-white">{formatCurrency(s.grandTotal)}</td>
+                      <td>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400">
+                          {s.paymentMethod}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -222,98 +233,114 @@ export default function DashboardPage() {
       </div>
 
       {/* POS ACCESS CONTROL & EMAIL PERMISSIONS MANAGEMENT SECTION */}
-      <div className="glass-card border border-emerald-500/30">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800 pb-4 mb-5">
-          <div>
-            <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
-              <span>POS সার্ভিস ও ইউজার এক্সেস পারমিশন কন্ট্রোল (POS Authorized Emails)</span>
-            </h3>
-            <p className="text-xs text-gray-400 mt-1">
-              যেসব ইমেইল অ্যাড্রেস POS রেজিস্টার অ্যাক্সেস করতে পারবে তা সেট করুন।
-            </p>
+      {isAdmin ? (
+        <div className="glass-card border border-emerald-500/30">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800 pb-4 mb-5">
+            <div>
+              <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <span>POS সার্ভিস ও ইউজার এক্সেস পারমিশন কন্ট্রোল (POS Authorized Emails)</span>
+              </h3>
+              <p className="text-xs text-gray-400 mt-1">
+                যেসব ইমেইল অ্যাড্রেস POS রেজিস্টার অ্যাক্সেস করতে পারবে তা সেট করুন।
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowAddEmailModal(true)}
+              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg flex items-center gap-2 self-start sm:self-auto transition"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>+ নতুন ইমেইল পারমিশন দিন</span>
+            </button>
           </div>
 
-          <button
-            onClick={() => setShowAddEmailModal(true)}
-            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg flex items-center gap-2 self-start sm:self-auto transition"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>+ নতুন ইমেইল পারমিশন দিন</span>
-          </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>অপারেটর / নাম</th>
-                <th>অনুমোদিত ইমেইল (Authorized Email)</th>
-                <th>পারমিশন রোল</th>
-                <th>এক্সেস স্ট্যাটাস</th>
-                <th>যুক্ত হওয়ার তারিখ</th>
-                <th>অ্যাকশন</th>
-              </tr>
-            </thead>
-            <tbody>
-              {posEmails.length === 0 ? (
+          <div className="overflow-x-auto">
+            <table className="custom-table">
+              <thead>
                 <tr>
-                  <td colSpan={6} className="text-center py-6 text-gray-500">
-                    কোন ইমেইল পারমিশন যুক্ত করা হয়নি।
-                  </td>
+                  <th>অপারেটর / নাম</th>
+                  <th>অনুমোদিত ইমেইল (Authorized Email)</th>
+                  <th>পারমিশন রোল</th>
+                  <th>এক্সেস স্ট্যাটাস</th>
+                  <th>যুক্ত হওয়ার তারিখ</th>
+                  <th>অ্যাকশন</th>
                 </tr>
-              ) : (
-                posEmails.map((item) => (
-                  <tr key={item.id}>
-                    <td className="font-bold text-white flex items-center gap-2">
-                      <Key className="w-4 h-4 text-amber-400" />
-                      <span>{item.name}</span>
-                    </td>
-                    <td className="font-mono text-emerald-300 font-semibold">{item.email}</td>
-                    <td>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                        {item.role}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleToggleEmailStatus(item.id, item.status)}
-                        className={`px-2.5 py-1 rounded-full text-xs font-extrabold flex items-center gap-1.5 transition ${
-                          item.status === 'Active'
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                        }`}
-                      >
-                        {item.status === 'Active' ? (
-                          <>
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            <span>Active (অনুমোদিত)</span>
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="w-3.5 h-3.5" />
-                            <span>Inactive (বন্ধ)</span>
-                          </>
-                        )}
-                      </button>
-                    </td>
-                    <td className="text-xs text-gray-400">{item.addedDate}</td>
-                    <td>
-                      <button
-                        onClick={() => setDeleteEmailId({ id: item.id, email: item.email })}
-                        className="p-1.5 bg-white/5 hover:bg-rose-500/20 text-rose-400 rounded-lg transition"
-                        title="অ্যাক্সেস বাতিল করুন"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+              </thead>
+              <tbody>
+                {posEmails.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-6 text-gray-500">
+                      কোন ইমেইল পারমিশন যুক্ত করা হয়নি।
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  posEmails.map((item) => (
+                    <tr key={item.id}>
+                      <td className="font-bold text-white flex items-center gap-2">
+                        <Key className="w-4 h-4 text-amber-400" />
+                        <span>{item.name}</span>
+                      </td>
+                      <td className="font-mono text-emerald-300 font-semibold">{item.email}</td>
+                      <td>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                          {item.role}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleToggleEmailStatus(item.id, item.status)}
+                          className={`px-2.5 py-1 rounded-full text-xs font-extrabold flex items-center gap-1.5 transition ${
+                            item.status === 'Active'
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                          }`}
+                        >
+                          {item.status === 'Active' ? (
+                            <>
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              <span>Active (অনুমোদিত)</span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-3.5 h-3.5" />
+                              <span>Inactive (বন্ধ)</span>
+                            </>
+                          )}
+                        </button>
+                      </td>
+                      <td className="text-xs text-gray-400">{item.addedDate}</td>
+                      <td>
+                        <button
+                          onClick={() => setDeleteEmailId({ id: item.id, email: item.email })}
+                          className="p-1.5 bg-white/5 hover:bg-rose-500/20 text-rose-400 rounded-lg transition"
+                          title="অ্যাক্সেস বাতিল করুন"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="glass-card border border-amber-500/20 bg-slate-900/40 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold flex-shrink-0">
+              <Lock className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">POS সিকিউরিটি ও এক্সেস কন্ট্রোল পানেল</h4>
+              <p className="text-xs text-gray-400 mt-0.5">
+                অপারেটর ও স্টাফ পারমিশন লিস্ট দেখতে এবং নতুন ইমেইল অ্যাক্সেস প্রদান করতে অ্যাডমিন হিসেবে সাইন ইন করুন।
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ADD AUTHORIZED EMAIL MODAL */}
       {showAddEmailModal && (
