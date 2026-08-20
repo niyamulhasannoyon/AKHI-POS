@@ -308,7 +308,7 @@ export default function BatchProfileModal({ flock, onClose }: BatchProfileModalP
       type: 'Income',
       category: 'Live Bird Sales',
       amount: totalAmount,
-      note: `Batch: ${flock.name} - ${pcs} pcs (${weight}kg @ ৳${rate}/kg) - Buyer: ${saleBuyer.trim()}`
+      note: `Batch: ${flock.name} - ${pcs} pcs (${weight}kg @ ৳${rate}/kg) - Buyer: ${saleBuyer.trim()}${saleNotes ? ` - ${saleNotes}` : ''}`
     });
 
     setSaleBuyer('');
