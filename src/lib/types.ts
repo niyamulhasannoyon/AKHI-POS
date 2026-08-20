@@ -165,6 +165,8 @@ export interface BatchSale {
   totalWeight: number;
   pricePerKg: number;
   totalAmount: number;
+  paidAmount?: number;
+  dueAmount?: number;
 }
 
 export interface BatchExpense {
@@ -177,6 +179,29 @@ export interface BatchExpense {
   pricePerBag?: number;
   feedType?: string;
   note?: string;
+}
+
+export interface BatchLabor {
+  id: string;
+  flockId: string;
+  date: string;
+  staffName: string;
+  workDescription: string;
+  paidAmount: number;
+  dueAmount: number;
+  notes?: string;
+}
+
+export interface BatchWeightLog {
+  id: string;
+  flockId: string;
+  date: string;
+  ageDays: number;
+  sampleBirdCount: number;
+  sampleTotalWeightKg: number;
+  avgWeightKg: number;
+  mortalityCount: number;
+  notes?: string;
 }
 
 export interface AuthUser {
@@ -211,6 +236,8 @@ export interface FarmState {
   employees: Employee[];
   batchSales: BatchSale[];
   batchExpenses: BatchExpense[];
+  batchLabor: BatchLabor[];
+  batchWeightLogs: BatchWeightLog[];
   khamars: KhamarProfile[];
   customerPayments: CustomerPayment[];
   posAuthorizedEmails: PosAuthorizedEmail[];

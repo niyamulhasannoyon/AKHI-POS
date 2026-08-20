@@ -5,23 +5,30 @@ import MainLayout from '@/components/layout/MainLayout';
 export const metadata: Metadata = {
   title: 'AKHI POS - Smart Poultry Farm & Business Management System Pro',
   description: 'Enterprise Poultry Farm Management, Khamar Batch Tracker & Point of Sale (POS) System',
+  manifest: '/site.webmanifest',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/logo.png', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
       { url: '/icon.png', type: 'image/png' },
-      { url: '/favicon.png', type: 'image/png' },
     ],
     shortcut: '/favicon.ico',
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-      { url: '/logo.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      {
+        rel: 'apple-touch-icon-precomposed',
+        url: '/apple-touch-icon.png',
+      },
     ],
   },
   openGraph: {
     title: 'AKHI POS - Smart Poultry Farm & Business Management System Pro',
     description: 'Enterprise Poultry Farm Management & Point of Sale System',
-    images: ['/logo.png'],
+    images: ['/images/logo.svg', '/logo.png'],
   },
 };
 

@@ -142,8 +142,8 @@ export default function GoogleAuthModal({ isOpen, onClose }: GoogleAuthModalProp
 
         {/* Brand Icon Header */}
         <div className="flex flex-col items-center gap-3">
-          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl shadow-emerald-950/80 border border-emerald-500/40 p-1 bg-[#090d16]">
-            <img src="/logo.png" alt="AKHI POS Logo" className="w-full h-full object-cover rounded-xl" />
+          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl shadow-emerald-950/80 border border-emerald-500/40 p-1.5 bg-[#090d16]">
+            <img src="/images/logo-icon.svg" alt="AKHI POS Logo" className="w-full h-full object-contain rounded-xl" />
           </div>
           <div>
             <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-amber-300 to-emerald-400">

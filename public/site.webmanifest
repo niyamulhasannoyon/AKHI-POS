@@ -1,0 +1,24 @@
+{
+  "name": "AKHI POS - Smart Poultry Farm & Business Management System Pro",
+  "short_name": "AKHI POS",
+  "description": "Enterprise Poultry Farm Management, Khamar Batch Tracker & Point of Sale System",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#090d16",
+  "background_color": "#090d16",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}

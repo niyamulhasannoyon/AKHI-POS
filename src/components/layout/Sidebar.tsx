@@ -78,8 +78,8 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps)
             onClick={() => setIsMobileOpen(false)}
             className="flex items-center gap-3 hover:opacity-90 transition cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-emerald-900/30 border border-emerald-500/30 flex-shrink-0 group-hover:scale-105 transition-transform bg-[#090d16]">
-              <img src="/logo.png" alt="AKHI POS" className="w-full h-full object-cover" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-emerald-900/30 border border-emerald-500/30 flex-shrink-0 group-hover:scale-105 transition-transform bg-[#090d16] p-0.5">
+              <img src="/images/logo-icon.svg" alt="AKHI POS" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-amber-400 text-lg leading-tight">

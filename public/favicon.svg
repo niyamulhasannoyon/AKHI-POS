@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="favBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#090d16" />
+    </linearGradient>
+
+    <linearGradient id="favEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <linearGradient id="favCyan" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+
+    <linearGradient id="favAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#favBg)" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" />
+
+  <g transform="translate(64, 64) scale(0.22) translate(-256, -256)">
+    <!-- Outer Shield Frame -->
+    <path d="M 256 64 L 400 136 V 280 C 400 368 336 424 256 448 C 176 424 112 368 112 280 V 136 Z" 
+          fill="none" stroke="url(#favEmerald)" stroke-width="16" stroke-linejoin="round" />
+
+    <!-- Inner Shield Core -->
+    <path d="M 256 84 L 380 148 V 272 C 380 348 324 398 256 420 C 188 398 132 348 132 272 V 148 Z" 
+          fill="#0b1329" stroke="url(#favEmerald)" stroke-width="8" stroke-linejoin="round" />
+
+    <!-- Comb Feathers -->
+    <path d="M 256 120 C 275 120 290 100 282 82 C 298 92 312 88 316 72 C 328 92 342 96 348 112 C 330 114 318 126 314 140 Z" fill="url(#favAmber)" />
+    <path d="M 256 120 C 237 120 222 100 230 82 C 214 92 200 88 196 72 C 184 92 170 96 164 112 C 182 114 194 126 198 140 Z" fill="url(#favAmber)" />
+
+    <!-- Wing Legs -->
+    <path d="M 256 150 L 168 320 H 215 L 242 265 H 256 Z" fill="url(#favEmerald)" />
+    <path d="M 256 150 L 344 320 H 297 L 270 265 H 256 Z" fill="url(#favCyan)" />
+
+    <!-- Core Diamond -->
+    <polygon points="256,180 282,235 256,290 230,235" fill="url(#favAmber)" />
+    <path d="M 190 270 Q 256 240 322 270 L 334 292 Q 256 260 178 292 Z" fill="url(#favAmber)" />
+    <path d="M 190 340 C 230 365 282 365 322 340 C 310 375 278 390 256 390 C 234 390 202 375 190 340 Z" fill="url(#favAmber)" />
+    <circle cx="256" cy="235" r="10" fill="#ffffff" />
+  </g>
+</svg>

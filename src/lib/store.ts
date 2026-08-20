@@ -28,6 +28,8 @@ export const EMPTY_STATE: FarmState = {
   employees: [],
   batchSales: [],
   batchExpenses: [],
+  batchLabor: [],
+  batchWeightLogs: [],
   khamars: [],
   customerPayments: [],
   posAuthorizedEmails: [
@@ -61,6 +63,8 @@ export const DEFAULT_SEED: FarmState = {
   employees: [],
   batchSales: [],
   batchExpenses: [],
+  batchLabor: [],
+  batchWeightLogs: [],
   khamars: [],
   customerPayments: [],
   posAuthorizedEmails: [
@@ -234,6 +238,8 @@ class FarmStore {
             employees: mergeArr(this.state.employees, dbData.employees),
             batchSales: mergeArr(this.state.batchSales, dbData.batchSales),
             batchExpenses: mergeArr(this.state.batchExpenses, dbData.batchExpenses),
+            batchLabor: mergeArr(this.state.batchLabor || [], dbData.batchLabor || []),
+            batchWeightLogs: mergeArr(this.state.batchWeightLogs || [], dbData.batchWeightLogs || []),
             khamars: mergeArr(this.state.khamars, dbData.khamars),
             customerPayments: mergeArr(this.state.customerPayments, dbData.customerPayments),
             posAuthorizedEmails: dbData.posAuthorizedEmails && dbData.posAuthorizedEmails.length > 0
@@ -326,7 +332,7 @@ class FarmStore {
   }
 
   // Mutations
-  public addItem<K extends keyof FarmState>(key: K, item: FarmState[K] extends (infer T)[] ? T : FarmState[K]) {
+  public addItem<K extends keyof FarmState>(key: K, item: NonNullable<FarmState[K]> extends (infer T)[] ? T : NonNullable<FarmState[K]>) {
     const list = this.state[key];
     if (Array.isArray(list)) {
       const newList = [item, ...(list as unknown as unknown[])];

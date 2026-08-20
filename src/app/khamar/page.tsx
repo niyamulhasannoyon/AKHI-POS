@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { farmStore } from '@/lib/store';
 import { Flock, BatchSale, BatchExpense, KhamariLog, KhamarProfile } from '@/lib/types';
 import { formatDate, formatCurrency, calculateFlockAgeDays } from '@/lib/utils';
+import BatchProfileModal from '@/components/khamar/BatchProfileModal';
 import { 
   Bird, 
   Plus, 
@@ -18,7 +19,8 @@ import {
   ArrowLeft,
   FileText,
   Egg,
-  Layers
+  Layers,
+  Scale
 } from 'lucide-react';
 
 export default function KhamarPage() {
@@ -28,6 +30,7 @@ export default function KhamarPage() {
   const [khamariLogs, setKhamariLogs] = useState<KhamariLog[]>([]);
   const [khamars, setKhamars] = useState<KhamarProfile[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [selectedBatchProfile, setSelectedBatchProfile] = useState<Flock | null>(null);
 
   // Suggestion visibility toggles
   const [showBuyerSuggestions, setShowBuyerSuggestions] = useState(false);
@@ -1446,14 +1449,12 @@ export default function KhamarPage() {
 
                     <button
                       onClick={() => {
-                        setSelectedFlock(f);
-                        setStatementTab('SALES');
-                        setActiveModal('BATCH_DETAILS');
+                        setSelectedBatchProfile(f);
                       }}
-                      className="w-full py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition"
+                      className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-950/40 transition cursor-pointer"
                     >
-                      <FileText className="w-4 h-4 text-emerald-400" />
-                      <span>📋 ফুল বিক্রয় ও খরচের স্টেটমেন্ট দেখুন</span>
+                      <Bird className="w-4 h-4" />
+                      <span>📂 ব্যাচ প্রোফাইল ড্যাশবোর্ড (Batch Profile)</span>
                     </button>
                   </div>
                 </div>
@@ -1488,7 +1489,10 @@ export default function KhamarPage() {
                     return (
                       <tr key={f.id}>
                         <td className="font-bold text-emerald-400">{f.id}</td>
-                        <td><b>{f.name}</b><br/><small className="text-gray-400">{f.breed} ({f.companyName || 'N/A'})</small></td>
+                        <td className="cursor-pointer" onClick={() => setSelectedBatchProfile(f)}>
+                          <b className="hover:text-emerald-400 transition">{f.name}</b><br/>
+                          <small className="text-gray-400">{f.breed} ({f.companyName || 'N/A'})</small>
+                        </td>
                         <td>{formatDate(f.startDate)}</td>
                         <td><b>{calculateFlockAgeDays(f.startDate)} দিন</b></td>
                         <td>{f.initialQty} টি</td>
@@ -1501,6 +1505,14 @@ export default function KhamarPage() {
                         </td>
                         <td>
                           <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setSelectedBatchProfile(f)}
+                              className="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs rounded-lg transition flex items-center gap-1"
+                              title="ব্যাচ প্রোফাইল ড্যাশবোর্ড খুলুন"
+                            >
+                              <Bird className="w-3.5 h-3.5" />
+                              <span>প্রোফাইল</span>
+                            </button>
                             <button
                               onClick={() => {
                                 setSelectedFlock(f);
@@ -1786,6 +1798,13 @@ export default function KhamarPage() {
             )}
           </div>
         </div>
+      )}
+      {/* BATCH PROFILE MODAL DASHBOARD */}
+      {selectedBatchProfile && (
+        <BatchProfileModal
+          flock={selectedBatchProfile}
+          onClose={() => setSelectedBatchProfile(null)}
+        />
       )}
     </div>
   );
